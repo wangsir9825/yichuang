@@ -144,7 +144,7 @@ public class Form1 : Form
 	{
 		try
 		{
-			using NamedPipeClientStream pipeClient = new NamedPipeClientStream(".", "XTransNoLoginOcr2918", PipeDirection.InOut);
+			using NamedPipeClientStream pipeClient = new NamedPipeClientStream(".", "YiChuangOcr2918", PipeDirection.InOut);
 			await pipeClient.ConnectAsync(5000).ConfigureAwait(false);
 			byte[] data = Encoding.UTF8.GetBytes(message);
 			await pipeClient.WriteAsync(data, 0, data.Length).ConfigureAwait(false);

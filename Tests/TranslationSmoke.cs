@@ -56,7 +56,7 @@ class TranslationSmoke
                     return File.Exists(dll)?Assembly.LoadFile(dll):null;
                 };
                         Assembly assembly=Assembly.LoadFrom(exe);
-                        MethodInfo translate=assembly.GetType("Xtranslator.ChatGPT").GetMethod("LoadSourceCode4",BindingFlags.Static|BindingFlags.Public,null,new[]{typeof(object),typeof(string),typeof(string),typeof(string)},null);
+                        MethodInfo translate=assembly.GetType("YiChuang.ChatGPT").GetMethod("LoadSourceCode4",BindingFlags.Static|BindingFlags.Public,null,new[]{typeof(object),typeof(string),typeof(string),typeof(string)},null);
                         File.AppendAllText(Path.Combine(output,"progress.txt"),"Invoking translator\n");
                         string result=(string)translate.Invoke(null,new object[]{"Translate this test sentence.","127.0.0.1:"+port,"trial-test-key","mock-model"});
                         if(!server.Wait(5000))throw new Exception("Mock server did not finish");listener.Stop();

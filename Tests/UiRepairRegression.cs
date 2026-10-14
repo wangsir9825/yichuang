@@ -20,7 +20,7 @@ class UiRepairRegression {
   show("引擎管理");var content=(Panel)Field(settings,"content");var manager=content.Controls[0];
   var list=(CheckedListBox)manager.Controls.Find("ManagedEngines",true)[0];var edit=(Button)manager.Controls.Find("EditEngine",true)[0];
   var save=(Button)settings.Controls.Find("SaveSettings",true)[0];
-  var registry=app.GetType("Xtranslator.EngineRegistry");string before=string.Join(",",(int[])registry.GetProperty("VisibleIds").GetValue(null,null));string order=string.Join(",",(int[])registry.GetProperty("ActiveIds").GetValue(null,null));
+  var registry=app.GetType("YiChuang.EngineRegistry");string before=string.Join(",",(int[])registry.GetProperty("VisibleIds").GetValue(null,null));string order=string.Join(",",(int[])registry.GetProperty("ActiveIds").GetValue(null,null));
   foreach(int id in new[]{6,14,16,17,18,19}){
    for(int i=0;i<list.Items.Count;i++)if((int)list.Items[i].GetType().GetField("Id").GetValue(list.Items[i])==id)list.SelectedIndex=i;
    edit.PerformClick();Application.DoEvents();Check(content.Controls[0]!=manager&&save.Text=="保存并返回","Missing engine-level navigation: "+id);
@@ -43,13 +43,13 @@ class UiRepairRegression {
   using(var watchdog=new System.Threading.Timer(s=>Environment.Exit(124),null,35000,Timeout.Infinite))try{
    string exe=Path.GetFullPath(args[0]);Directory.SetCurrentDirectory(Path.GetDirectoryName(exe));
    AppDomain.CurrentDomain.AssemblyResolve+=(s,e)=>{string f=Path.Combine(Path.GetDirectoryName(exe),new AssemblyName(e.Name).Name+".dll");return File.Exists(f)?Assembly.LoadFrom(f):null;};
-   var app=Assembly.LoadFrom(exe);var config=app.GetType("Xtranslator.ClassMain");
+   var app=Assembly.LoadFrom(exe);var config=app.GetType("YiChuang.ClassMain");
    Data=Path.Combine(output,"isolated-data-"+Guid.NewGuid().ToString("N"));Directory.CreateDirectory(Data);
    var proxies=(object[])app.GetType("_63AF42A1").GetField("_71AC5D16").GetValue(null);proxies[318]=Delegate.CreateDelegate(proxies[318].GetType(),typeof(UiRepairRegression).GetMethod("Folder"));
-   app.GetType("Xtranslator.Program").GetField("ProgramStarted").SetValue(null,new EventWaitHandle(false,EventResetMode.AutoReset));
+   app.GetType("YiChuang.Program").GetField("ProgramStarted").SetValue(null,new EventWaitHandle(false,EventResetMode.AutoReset));
    app.GetType("RebuildInfo").GetField("DiagnosticOutput",BindingFlags.Static|BindingFlags.NonPublic).SetValue(null,output);
    WebRequest.RegisterPrefix("http://",new Guard());WebRequest.RegisterPrefix("https://",new Guard());Application.EnableVisualStyles();
-   using(var main=(Form)Activator.CreateInstance(app.GetType("Xtranslator.Form2"))){
+   using(var main=(Form)Activator.CreateInstance(app.GetType("YiChuang.Form2"))){
     main.Opacity=0;main.Show();Application.DoEvents();main.GetType().GetField("_isInitializing",Private).SetValue(main,true);
     var source=(RichTextBox)Field(main,"rtb原文");var target=(RichTextBox)Field(main,"rtb译文");
     foreach(Control child in ((Panel)Field(main,"brandBar")).Controls)Log.Add("Brand "+child.GetType().Name+" "+child.Bounds+" visible="+child.Visible+" image="+(child is PictureBox?((PictureBox)child).Image!=null:false));
@@ -58,7 +58,7 @@ class UiRepairRegression {
     Check(!((ToolStripItem)Field(main,"toolStripButton3")).Visible,"Redundant exit is visible");
     Check(!((StatusStrip)Field(main,"modernStatusStrip")).Visible,"Idle footer hint remains");
     foreach(ToolStripItem item in ((ToolStrip)Field(main,"titleStrip")).Items)Check(item.Placement==ToolStripItemPlacement.Main,"Title action missing: "+item.Name);
-    var preferences=app.GetType("Xtranslator.UiPreferences");
+    var preferences=app.GetType("YiChuang.UiPreferences");
     var layoutPreference=preferences.GetField("Layout",BindingFlags.Static|BindingFlags.Public|BindingFlags.NonPublic);
     foreach(string mode in new[]{"compact","wide","compact","wide"}){
      layoutPreference.SetValue(null,mode);Call(main,"ApplyModernLayout",true);main.Size=main.MinimumSize;Application.DoEvents();
@@ -106,7 +106,7 @@ class UiRepairRegression {
      Render(main,Path.Combine(output,"native-font-"+size+".png"));
     }
     Log.Add("12/24/32 pt, multiple paragraphs, actual glyph height, nonoverlap and preserved selection: passed");
-    using(var settings=(Form)Activator.CreateInstance(app.GetType("Xtranslator.Frmsetting"))){
+    using(var settings=(Form)Activator.CreateInstance(app.GetType("YiChuang.Frmsetting"))){
      settings.Opacity=0;settings.Show(main);Application.DoEvents();
      var save=(Button)settings.Controls.Find("SaveSettings",true)[0];
      CheckSettingsNavigation(settings,app,output);

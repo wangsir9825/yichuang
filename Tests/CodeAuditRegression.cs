@@ -21,8 +21,8 @@ class CodeAuditRegression
     public static string Folder(Environment.SpecialFolder folder) { return Data; }
     class Guard:IWebRequestCreate { public WebRequest Create(Uri uri) { Requests++;throw new Exception("Unexpected network request"); } }
     static object Call(object obj,string name,params object[] args) { return obj.GetType().GetMethod(name,Hidden|BindingFlags.Public).Invoke(obj,args); }
-    static object Invoke(string type,string name,params object[] args) { return App.GetType("Xtranslator."+type).GetMethods(Static).Single(m=>m.Name==name&&m.GetParameters().Length==args.Length).Invoke(null,args); }
-    static object New(string type,params object[] args) { return Activator.CreateInstance(App.GetType("Xtranslator."+type),Hidden|BindingFlags.Public,null,args,null); }
+    static object Invoke(string type,string name,params object[] args) { return App.GetType("YiChuang."+type).GetMethods(Static).Single(m=>m.Name==name&&m.GetParameters().Length==args.Length).Invoke(null,args); }
+    static object New(string type,params object[] args) { return Activator.CreateInstance(App.GetType("YiChuang."+type),Hidden|BindingFlags.Public,null,args,null); }
     static object Field(object obj,string name) { return obj.GetType().GetField(name,Hidden).GetValue(obj); }
     static void Check(bool ok,string message) { if(!ok)throw new Exception(message); }
     static string Error(Action action) { try { action();return ""; } catch(Exception ex) { while(ex is TargetInvocationException&&ex.InnerException!=null)ex=ex.InnerException;return ex.Message; } }
@@ -30,7 +30,7 @@ class CodeAuditRegression
     static void Wait(Func<bool> condition,int milliseconds=5000) { var until=DateTime.UtcNow.AddMilliseconds(milliseconds);while(!condition()&&DateTime.UtcNow<until){Application.DoEvents();Thread.Sleep(10);}Check(condition(),"Timed out waiting for audited operation"); }
     static void Settings()
     {
-        string folder=Path.Combine(Data,"Xtranslator-NoLogin-2.9.18B");Directory.CreateDirectory(folder);string path=Path.Combine(folder,"setting.txt");
+        string folder=Path.Combine(Data,"YiChuang");Directory.CreateDirectory(folder);string path=Path.Combine(folder,"setting.txt");
         const string first="{\"DeepSeekAI_key\":\"audit-test-key-only\",\"Master_switch\":\"0\"}",second="{\"DeepSeekAI_key\":\"audit-test-key-two\",\"Master_switch\":\"0\"}";
         File.WriteAllText(path,(string)Invoke("RSA","RSAEncrypt",first));
         Check((string)Invoke("ClassMain","readJiekou")==first,"Legacy settings unreadable");
@@ -53,12 +53,12 @@ class CodeAuditRegression
             Check(Error(()=>Invoke("SettingsStore","ImportBackup",bad))!="","Malformed backup accepted");
             Check((string)Invoke("ClassMain","readJiekou")==second&&(string)Invoke("EngineRegistry","Export")==active,"Rejected backup changed active settings");
         }
-        string originalModel=(string)App.GetType("Xtranslator.LocalModelSettings").GetField("GemmaModel").GetValue(null);
-        App.GetType("Xtranslator.LocalModelSettings").GetField("GemmaModel").SetValue(null,"audit-saved-local-model:latest");
+        string originalModel=(string)App.GetType("YiChuang.LocalModelSettings").GetField("GemmaModel").GetValue(null);
+        App.GetType("YiChuang.LocalModelSettings").GetField("GemmaModel").SetValue(null,"audit-saved-local-model:latest");
         string complete=(string)Invoke("ClassMain","moren");Invoke("SettingsStore","ImportBackup",complete);
-        App.GetType("Xtranslator.LocalModelSettings").GetField("GemmaModel").SetValue(null,"changed");Invoke("ClassMain","read_setSetting",(string)Invoke("ClassMain","readJiekou"));
-        Check((string)App.GetType("Xtranslator.LocalModelSettings").GetField("GemmaModel").GetValue(null)=="audit-saved-local-model:latest","Local model missing from backup round trip");
-        App.GetType("Xtranslator.LocalModelSettings").GetField("GemmaModel").SetValue(null,originalModel);
+        App.GetType("YiChuang.LocalModelSettings").GetField("GemmaModel").SetValue(null,"changed");Invoke("ClassMain","read_setSetting",(string)Invoke("ClassMain","readJiekou"));
+        Check((string)App.GetType("YiChuang.LocalModelSettings").GetField("GemmaModel").GetValue(null)=="audit-saved-local-model:latest","Local model missing from backup round trip");
+        App.GetType("YiChuang.LocalModelSettings").GetField("GemmaModel").SetValue(null,originalModel);
         Log.Add("Settings: legacy->DPAPI, valid backup recovery, preserve corruption, block empty overwrite, explicit recovery, invalid-save protection: passed");
         Log.Add("Backup import: reject unrelated/structured/bad-registry/invalid-font input without changing saved settings or active engines; local model round trip: passed");
     }
@@ -92,7 +92,7 @@ class CodeAuditRegression
     }
     static Task SendPipe(byte[] data,int chunk=7)
     {
-        return Task.Run(()=>{using(var pipe=new NamedPipeClientStream(".","XTransNoLoginOcr2918",PipeDirection.Out)){pipe.Connect(3000);for(int i=0;i<data.Length;i+=chunk)pipe.Write(data,i,Math.Min(chunk,data.Length-i));}});
+        return Task.Run(()=>{using(var pipe=new NamedPipeClientStream(".","YiChuangOcr2918",PipeDirection.Out)){pipe.Connect(3000);for(int i=0;i<data.Length;i+=chunk)pipe.Write(data,i,Math.Min(chunk,data.Length-i));}});
     }
     static void FormAndOcr()
     {
@@ -101,12 +101,12 @@ class CodeAuditRegression
         for(int round=0;round<2;round++)
         using(var main=(Form)New("Form2")) {
             main.Opacity=0;main.Show();Application.DoEvents();main.GetType().GetField("_isInitializing",Hidden).SetValue(main,true);Control.CheckForIllegalCrossThreadCalls=true;
-            Invoke("EngineRegistry","SetVisible",17,true);App.GetType("Xtranslator.ClassMain").GetField("isjiekounum").SetValue(null,17);
+            Invoke("EngineRegistry","SetVisible",17,true);App.GetType("YiChuang.ClassMain").GetField("isjiekounum").SetValue(null,17);
             using(var settings=(Form)New("Frmsetting")) {
                 settings.Opacity=0;settings.Show(main);Application.DoEvents();
-                Check((bool)App.GetType("Xtranslator.ClassSetHotKey").GetField("Suspended",Static).GetValue(null),"Settings did not suspend hotkeys");
+                Check((bool)App.GetType("YiChuang.ClassSetHotKey").GetField("Suspended",Static).GetValue(null),"Settings did not suspend hotkeys");
                 settings.Dispose();
-                Check(!(bool)App.GetType("Xtranslator.ClassSetHotKey").GetField("Suspended",Static).GetValue(null),"Direct settings disposal left hotkeys suspended");
+                Check(!(bool)App.GetType("YiChuang.ClassSetHotKey").GetField("Suspended",Static).GetValue(null),"Direct settings disposal left hotkeys suspended");
             }
             var source=(RichTextBox)Field(main,"rtb原文");string expected=string.Concat(Enumerable.Repeat("中文😀 Alpha. ",500));
             var sent=SendPipe(Encoding.UTF8.GetBytes(expected));Wait(()=>sent.IsCompleted&&source.Text==expected,7000);sent.GetAwaiter().GetResult();
@@ -115,13 +115,13 @@ class CodeAuditRegression
                 var target=(RichTextBox)Field(main,"rtb译文");
                 Log.Add("OCR invalid UTF-8 begins");sent=SendPipe(new byte[]{255});Wait(()=>sent.IsCompleted&&target.Text.Contains("接收失败"));sent.GetAwaiter().GetResult();Check(source.Text==expected,"Invalid UTF-8 replaced original");
                 Log.Add("OCR oversized input begins");sent=SendPipe(new byte[256*1024+1],4096);Wait(()=>target.Text.Contains("过长"));Wait(()=>sent.IsCompleted);if(sent.IsFaulted)Check(sent.Exception.GetBaseException() is IOException,"Unexpected oversized sender error");Check(source.Text==expected,"Oversized OCR replaced original");
-                Log.Add("OCR idle timeout begins");using(var idle=new NamedPipeClientStream(".","XTransNoLoginOcr2918",PipeDirection.Out)) { idle.Connect(3000);Wait(()=>target.Text.Contains("超时"),6500); }
+                Log.Add("OCR idle timeout begins");using(var idle=new NamedPipeClientStream(".","YiChuangOcr2918",PipeDirection.Out)) { idle.Connect(3000);Wait(()=>target.Text.Contains("超时"),6500); }
                 Log.Add("OCR recovery begins");sent=SendPipe(Encoding.UTF8.GetBytes("Recovered OCR."));Wait(()=>sent.IsCompleted&&source.Text=="Recovered OCR.");sent.GetAwaiter().GetResult();source.Text=expected;
             }
             foreach(int mode in new[]{1,2,3}) {Call(main,"SetCaptureMode",mode,true);Call(main,"WndProc",Message.Create(main.Handle,0x031D,IntPtr.Zero,IntPtr.Zero));Check(source.Text==expected,"Unsolicited clipboard replaced original in mode "+mode);}
             var receiver=Field(main,"ocrReceiver");main.Close();
             var completion=(Task)receiver.GetType().GetProperty("Completion",Hidden).GetValue(receiver,null);Wait(()=>completion.IsCompleted);completion.GetAwaiter().GetResult();
-            var subscribers=App.GetType("Xtranslator.ChatGPT").GetField("MyChatGPTEvent",Static).GetValue(null);Check(subscribers==null,"Closed form retained static streaming handler");
+            var subscribers=App.GetType("YiChuang.ChatGPT").GetField("MyChatGPTEvent",Static).GetValue(null);Check(subscribers==null,"Closed form retained static streaming handler");
         }
         Log.Add("Actual Form2: fragmented >1KB Unicode OCR, invalid UTF-8/oversize/idle-client recovery, twice across close/reopen, settings-dispose restores hotkeys, all modes ignore unsolicited clipboard, pipe shutdown and static-event unsubscribe: passed");
     }
@@ -145,7 +145,7 @@ class CodeAuditRegression
             AppDomain.CurrentDomain.AssemblyResolve+=(s,e)=>{string path=Path.Combine(Path.GetDirectoryName(exe),new AssemblyName(e.Name).Name+".dll");return File.Exists(path)?Assembly.LoadFrom(path):null;};
             App=Assembly.LoadFrom(exe);Data=Path.Combine(output,"isolated-data-"+Guid.NewGuid().ToString("N"));Directory.CreateDirectory(Data);
             var proxies=(object[])App.GetType("_63AF42A1").GetField("_71AC5D16").GetValue(null);proxies[318]=Delegate.CreateDelegate(proxies[318].GetType(),typeof(CodeAuditRegression).GetMethod("Folder"));
-            App.GetType("Xtranslator.Program").GetField("ProgramStarted").SetValue(null,new EventWaitHandle(false,EventResetMode.AutoReset));
+            App.GetType("YiChuang.Program").GetField("ProgramStarted").SetValue(null,new EventWaitHandle(false,EventResetMode.AutoReset));
             App.GetType("RebuildInfo").GetField("DiagnosticOutput",Static).SetValue(null,output);
             WebRequest.RegisterPrefix("http://",new Guard());WebRequest.RegisterPrefix("https://",new Guard());Application.EnableVisualStyles();
             Settings();Streams();CaptureAndScheduler();IdleOcrShutdown();FormAndOcr();Check(Requests==0,"Unexpected outbound request");

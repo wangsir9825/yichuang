@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
@@ -63,7 +63,7 @@ class LocalModelRegression
                 while (offset < length) { int count = stream.Read(body,offset,length-offset); if (count == 0) break; offset += count; }
                 Dictionary<string,object> payload = length == 0 ? null : Json.Deserialize<Dictionary<string,object>>(Encoding.UTF8.GetString(body));
                 string response; string fault = Fault; string httpStatus = "200 OK";
-                if (path == "/api/tags") response = "{\"models\":[{\"name\":\"xtranslator-hy-mt2:7b-q6\"},{\"name\":\"translategemma:12b\"}]}";
+                if (path == "/api/tags") response = "{\"models\":[{\"name\":\"yichuang-hy-mt2:7b-q6\"},{\"name\":\"translategemma:12b\"}]}";
                 else if (path == "/api/ps") response = string.IsNullOrEmpty(Loaded) ? "{\"models\":[]}" : Json.Serialize(new { models = new[]{new {name=Loaded}} });
                 else if (path == "/api/generate") { Assert(Convert.ToInt32(payload["keep_alive"]) == 0,"Unload did not release the other model"); Loaded=""; Interlocked.Increment(ref Unloads); response="{}"; }
                 else if (path == "/api/chat") {
@@ -72,7 +72,7 @@ class LocalModelRegression
                     lock (Chats) Chats.Add(payload);
                     if (prompt.Contains("slow")) Thread.Sleep(350);
                     Loaded=payload["model"].ToString();
-                    response=Json.Serialize(new { message=new {content=(Loaded.StartsWith("xtranslator")?"腾讯译文：":"Google译文：") + prompt.Substring(prompt.LastIndexOf('\n')+1)}, done_reason="stop", load_duration=1000000, eval_count=20 });
+                    response=Json.Serialize(new { message=new {content=(Loaded.StartsWith("yichuang",StringComparison.OrdinalIgnoreCase)?"腾讯译文：":"Google译文：") + prompt.Substring(prompt.LastIndexOf('\n')+1)}, done_reason="stop", load_duration=1000000, eval_count=20 });
                 } else throw new Exception("Unexpected API path " + path);
                 if(fault=="missing" && path=="/api/tags") response="{\"models\":[]}";
                 if(fault=="500" && path=="/api/chat") {httpStatus="500 Internal Server Error";response="{\"error\":\"GPU memory unavailable\"}";}
@@ -94,11 +94,11 @@ class LocalModelRegression
         {
             string exe=Path.GetFullPath(args[0]); Directory.SetCurrentDirectory(Path.GetDirectoryName(exe));
             AppDomain.CurrentDomain.AssemblyResolve+=(s,e)=>{string file=Path.Combine(Path.GetDirectoryName(exe),new AssemblyName(e.Name).Name+".dll");return File.Exists(file)?Assembly.LoadFrom(file):null;};
-            Assembly app=Assembly.LoadFrom(exe); Type main=app.GetType("Xtranslator.ClassMain"), local=app.GetType("Xtranslator.LocalModelSettings"), client=app.GetType("Xtranslator.LocalModelClient");
+            Assembly app=Assembly.LoadFrom(exe); Type main=app.GetType("YiChuang.ClassMain"), local=app.GetType("YiChuang.LocalModelSettings"), client=app.GetType("YiChuang.LocalModelClient");
             Data=Path.Combine(Output,"isolated-data-"+Guid.NewGuid().ToString("N"));Directory.CreateDirectory(Data);
             var proxies=(object[])app.GetType("_63AF42A1").GetField("_71AC5D16").GetValue(null);
             proxies[318]=Delegate.CreateDelegate(proxies[318].GetType(),typeof(LocalModelRegression).GetMethod("Folder"));
-            app.GetType("Xtranslator.Program").GetField("ProgramStarted").SetValue(null,new EventWaitHandle(false,EventResetMode.AutoReset));
+            app.GetType("YiChuang.Program").GetField("ProgramStarted").SetValue(null,new EventWaitHandle(false,EventResetMode.AutoReset));
             app.GetType("RebuildInfo").GetField("DiagnosticOutput",BindingFlags.NonPublic|BindingFlags.Static).SetValue(null,Output);
             var listener=new TcpListener(IPAddress.Loopback,0);listener.Start();Port=((IPEndPoint)listener.LocalEndpoint).Port;
             var server=Task.Run(()=>Serve(listener));
@@ -108,8 +108,8 @@ class LocalModelRegression
             catch(TargetInvocationException ex) {Assert(ex.InnerException is InvalidOperationException,"Unexpected endpoint validation error");}
             log.Add("Remote endpoint rejected before any HTTP request: passed");
             Application.EnableVisualStyles();
-            var form=(Form)Activator.CreateInstance(app.GetType("Xtranslator.Form2"));form.Opacity=0;form.Show();Application.DoEvents();
-            foreach(int engineId in new[]{4,5,6,14,16,17,18,19})app.GetType("Xtranslator.EngineRegistry").GetMethod("SetVisible").Invoke(null,new object[]{engineId,true});
+            var form=(Form)Activator.CreateInstance(app.GetType("YiChuang.Form2"));form.Opacity=0;form.Show();Application.DoEvents();
+            foreach(int engineId in new[]{4,5,6,14,16,17,18,19})app.GetType("YiChuang.EngineRegistry").GetMethod("SetVisible").Invoke(null,new object[]{engineId,true});
             form.GetType().GetMethod("RebuildEngineMenu",BindingFlags.Instance|BindingFlags.NonPublic).Invoke(form,null);
 
             Set(main,"is单词悬浮框",true);
@@ -125,12 +125,12 @@ class LocalModelRegression
             Wait(()=>target.Text.Contains("Google译文：fresh"));
             Assert(Unloads>=2,"Models were not unloaded when switching");
             log.Add("Engine switch uses TranslateGemma and unloads the other translation model: passed");
-            var settings=(Form)Activator.CreateInstance(app.GetType("Xtranslator.Frmsetting"));settings.Opacity=0;settings.Show(form);
+            var settings=(Form)Activator.CreateInstance(app.GetType("YiChuang.Frmsetting"));settings.Opacity=0;settings.Show(form);
             settings.GetType().GetMethod("ShowPage").Invoke(settings,new object[]{"内置本地模型"});settings.Close();
             string configPath=(string)local.GetProperty("SettingsPath").GetValue(null,null);
             Assert(configPath.StartsWith(Data)&&File.Exists(configPath),"Local settings were not saved to isolated storage");
             var saved=Json.Deserialize<Dictionary<string,object>>(File.ReadAllText(configPath));
-            Assert(saved["hunyuan_model"].ToString()=="xtranslator-hy-mt2:7b-q6","Local model name did not persist");
+            Assert(saved["hunyuan_model"].ToString()=="yichuang-hy-mt2:7b-q6","Local model name did not persist");
             var savedMain=Json.Deserialize<Dictionary<string,object>>((string)main.GetMethod("readJiekou").Invoke(null,null));
             Assert(savedMain["Translation_interface"].ToString()=="17","Selected local engine was reset on save");
             log.Add("Local settings and selected engine survive encrypted main-config save/read: passed");

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -16,10 +16,10 @@ class LocalSetupRegression
     static Assembly App;static string Data;static readonly List<string> Log=new List<string>();
     static BindingFlags Flags=BindingFlags.Public|BindingFlags.NonPublic|BindingFlags.Static|BindingFlags.Instance;
     public static string Folder(Environment.SpecialFolder folder){return Data;}
-    static object Invoke(string name,params object[] args){try{return App.GetType("Xtranslator.LocalRuntime").GetMethod(name,Flags).Invoke(null,args);}catch(TargetInvocationException ex){throw ex.InnerException;}}
+    static object Invoke(string name,params object[] args){try{return App.GetType("YiChuang.LocalRuntime").GetMethod(name,Flags).Invoke(null,args);}catch(TargetInvocationException ex){throw ex.InnerException;}}
     static void Check(bool ok,string message){if(!ok)throw new Exception(message);}
     static string Failure(Action action){try{action();return "";}catch(Exception ex){return ex.Message;}}
-    static object New(string name){return Activator.CreateInstance(App.GetType("Xtranslator."+name),true);}
+    static object New(string name){return Activator.CreateInstance(App.GetType("YiChuang."+name),true);}
     static object Field(object obj,string name){return obj.GetType().GetField(name,Flags).GetValue(obj);}
     static void Set(object obj,string name,object value){obj.GetType().GetField(name,Flags).SetValue(obj,value);}
     static void PumpUntil(Func<bool> ready){var until=DateTime.UtcNow.AddSeconds(10);while(!ready()&&DateTime.UtcNow<until){Application.DoEvents();Thread.Sleep(10);}Check(ready(),"Wizard operation did not finish");}
@@ -62,13 +62,14 @@ class LocalSetupRegression
             using(var cancel=new CancellationTokenSource()){cancel.Cancel();Check(Failure(()=>Invoke("ReadProgress",new StringReader("{\"status\":\"success\"}\n"),progress,cancel.Token))!="","Cancellation ignored");}
             Log.Add("Runtime settings, environment/default path selection, preferred program, stream success/error/EOF/malformed/cancel: passed.");
             using(var server=new Server()) {
-                server.Models.Add("xtranslator-hy-mt2:7b-q6");server.Models.Add("translategemma:12b");
+                server.Models.Add("yichuang-hy-mt2:7b-q6");server.Models.Add("translategemma:12b");
                 string untouched=Path.Combine(Data,"must-not-create");Set(options,"ModelsDirectory",untouched);
                 Check(!(bool)Invoke("EnsureService",options,server.Address,progress,token)&&!Directory.Exists(untouched),"Existing service was replaced or cache directory changed");
                 Invoke("PrepareModels",server.Address,true,true,progress,token);Check(server.Writes==0,"Existing models were re-downloaded");
                 Check(Failure(()=>Invoke("PrepareModels",server.Address,false,false,progress,token)).Contains("勾选"),"Empty selection accepted");
             }
             using(var server=new Server()){server.Models.Add("kaelri/hy-mt2:7b");Invoke("PrepareModels",server.Address,true,false,progress,token);Check(server.Writes==1&&server.Calls.Contains("/api/create")&&!server.Calls.Contains("/api/pull"),"Existing Hy base not reused");Check(server.CreateBody.Contains("<|extra_4|>")&&server.CreateBody.Contains("repeat_penalty"),"Hy template or generation parameters lost");}
+            using(var server=new Server()){server.Models.Add("previous-hy-mt2:7b-q6");Invoke("PrepareModels",server.Address,true,false,progress,token);Check(server.Writes==1&&!server.Calls.Contains("/api/pull")&&server.CreateBody.Contains("previous-hy-mt2:7b-q6"),"Previous Hy alias caused a weight download");}
             using(var server=new Server()){Invoke("PrepareModels",server.Address,false,true,progress,token);Check(server.Writes==1&&server.Models.SetEquals(new[]{"translategemma:12b"}),"Unchecked model was downloaded");}
             using(var server=new Server()){server.Forget=true;Check(Failure(()=>Invoke("PrepareModels",server.Address,false,true,progress,token)).Contains("尚未列出"),"Download success accepted without actual model tag");}
             using(var server=new Server()){server.Error=true;Check(Failure(()=>Invoke("PrepareModels",server.Address,false,true,progress,token)).Contains("test failure"),"Service failure discarded");}
@@ -83,14 +84,16 @@ class LocalSetupRegression
             using(var server=new Server())using(var owner=new Form{TopMost=true})using(var wizard=(Form)New("OllamaSetupWizard")) {
                 owner.Show();((TextBox)Field(wizard,"endpoint")).Text=server.Address;wizard.Show(owner);Application.DoEvents();Check(wizard.TopMost,"Wizard hidden below topmost owner");
                 var done=(Button)Field(wizard,"done");Check(done.Visible&&done.Parent.ClientRectangle.Contains(done.Bounds),"Wizard footer clipped");
+                Control.CheckForIllegalCrossThreadCalls=true;SynchronizationContext.SetSynchronizationContext(null);
                 var detect=(Button)Field(wizard,"detect");detect.PerformClick();PumpUntil(()=>detect.Enabled);Check((bool)Field(wizard,"serviceReady"),"Wizard detection failed");
                 ((CheckBox)Field(wizard,"gemma")).Checked=true;var download=(Button)Field(wizard,"download");download.PerformClick();PumpUntil(()=>download.Enabled);
                 Check(server.Models.Contains("translategemma:12b")&&done.Text.Contains("开始翻译"),"Wizard did not prepare/save selected model");
                 using(var bitmap=new System.Drawing.Bitmap(wizard.Width,wizard.Height)){wizard.DrawToBitmap(bitmap,new System.Drawing.Rectangle(0,0,wizard.Width,wizard.Height));bitmap.Save(Path.Combine(output,"wizard.png"));}
                 done.PerformClick();Check(wizard.IsDisposed,"Wizard completion did not close");
+                for(int i=0;i<25;i++){Application.DoEvents();Thread.Sleep(5);}
             }
             Log.Add("Actual wizard controls: visible footer, async service check, selected model preparation and settings saved in isolated profile, finish/close: passed.");
             File.WriteAllLines(Path.Combine(output,"result.txt"),Log);Console.WriteLine("Local setup regression passed.");return 0;
-        }catch(Exception ex){Log.Add(ex.ToString());File.WriteAllLines(Path.Combine(output,"result.txt"),Log);Console.Error.WriteLine(ex);return 1;}
+        }catch(Exception ex){Log.Add(ex.GetType().FullName+": "+ex.Message);File.WriteAllLines(Path.Combine(output,"result.txt"),Log);Console.Error.WriteLine(ex.GetType().FullName+": "+ex.Message);return 1;}
     }
 }

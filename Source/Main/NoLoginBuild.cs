@@ -1,5 +1,5 @@
 using System;
-using Xtranslator;
+using YiChuang;
 
 internal static class NoLoginBuild
 {

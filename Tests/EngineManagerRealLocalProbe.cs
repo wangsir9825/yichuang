@@ -24,23 +24,23 @@ class EngineManagerRealLocalProbe
         using(var watchdog=new System.Threading.Timer(s=>Environment.Exit(124),null,600000,Timeout.Infinite))try{
             string exe=Path.GetFullPath(args[0]);Directory.SetCurrentDirectory(Path.GetDirectoryName(exe));
             AppDomain.CurrentDomain.AssemblyResolve+=(s,e)=>{string f=Path.Combine(Path.GetDirectoryName(exe),new AssemblyName(e.Name).Name+".dll");return File.Exists(f)?Assembly.LoadFrom(f):null;};
-            var app=Assembly.LoadFrom(exe);var registry=app.GetType("Xtranslator.EngineRegistry");var def=app.GetType("Xtranslator.EngineDefinition");
+            var app=Assembly.LoadFrom(exe);var registry=app.GetType("YiChuang.EngineRegistry");var def=app.GetType("YiChuang.EngineDefinition");
             Data=Path.Combine(Output,"isolated-data-"+Guid.NewGuid().ToString("N"));Directory.CreateDirectory(Data);
             var proxies=(object[])app.GetType("_63AF42A1").GetField("_71AC5D16").GetValue(null);proxies[318]=Delegate.CreateDelegate(proxies[318].GetType(),typeof(EngineManagerRealLocalProbe).GetMethod("Folder"));
-            app.GetType("Xtranslator.Program").GetField("ProgramStarted").SetValue(null,new EventWaitHandle(false,EventResetMode.AutoReset));app.GetType("RebuildInfo").GetField("DiagnosticOutput",BindingFlags.Static|BindingFlags.NonPublic).SetValue(null,Output);
+            app.GetType("YiChuang.Program").GetField("ProgramStarted").SetValue(null,new EventWaitHandle(false,EventResetMode.AutoReset));app.GetType("RebuildInfo").GetField("DiagnosticOutput",BindingFlags.Static|BindingFlags.NonPublic).SetValue(null,Output);
             WebRequest.RegisterPrefix("http://",new Guard());WebRequest.RegisterPrefix("https://",new Guard());Application.EnableVisualStyles();
-            using(var main=(Form)Activator.CreateInstance(app.GetType("Xtranslator.Form2"))){
+            using(var main=(Form)Activator.CreateInstance(app.GetType("YiChuang.Form2"))){
                 main.Show();Application.DoEvents();Call(main,"SetCaptureMode",0,false);var source=(RichTextBox)Field(main,"rtb原文");var translated=(RichTextBox)Field(main,"rtb译文");var cancel=(ToolStripButton)Field(main,"localCancelButton");
-                foreach(string model in new[]{"xtranslator-hy-mt2:7b-q6","translategemma:12b"}){
-                    var e=Activator.CreateInstance(def);def.GetField("Name").SetValue(e,"自定义验收 "+model);def.GetField("Provider").SetValue(e,"ollama");def.GetField("Endpoint").SetValue(e,"http://127.0.0.1:11434");def.GetField("Model").SetValue(e,model);def.GetField("Prompt").SetValue(e,model.StartsWith("xtranslator")?"hy":"gemma");
+                foreach(string model in new[]{"yichuang-hy-mt2:7b-q6","translategemma:12b"}){
+                    var e=Activator.CreateInstance(def);def.GetField("Name").SetValue(e,"自定义验收 "+model);def.GetField("Provider").SetValue(e,"ollama");def.GetField("Endpoint").SetValue(e,"http://127.0.0.1:11434");def.GetField("Model").SetValue(e,model);def.GetField("Prompt").SetValue(e,model.StartsWith("yichuang",StringComparison.OrdinalIgnoreCase)?"hy":"gemma");
                     int id=(int)registry.GetMethod("Save").Invoke(null,new[]{e});source.Clear();Call(main,"RebuildEngineMenu");Call(main,"SelectManagedEngine",id);
                     int index=0;foreach(string text in new[]{"The new settings let users choose their own translation model.","用户可以在设置中添加或移除翻译引擎。","architecture"}){
                         Call(main,"xianshiyuanwen",text);var until=DateTime.UtcNow.AddSeconds(190);while(cancel.Enabled&&DateTime.UtcNow<until){Application.DoEvents();Thread.Sleep(30);}Application.DoEvents();
                         string result=translated.Text;if(cancel.Enabled||string.IsNullOrWhiteSpace(result)||result.StartsWith("翻译失败")||result.Contains("正在"))throw new Exception(model+" failed: "+result);
                         bool chinese=Regex.IsMatch(result,"[\u4e00-\u9fff]");if(index==1?chinese:!chinese)throw new Exception("Unexpected translation direction: "+result);
                         Log.Add(model+" | "+text+" => "+result);File.WriteAllLines(Path.Combine(Output,"real-local-results.txt"),Log);
-                        using(var bitmap=new Bitmap(main.Width,main.Height)){main.DrawToBitmap(bitmap,new Rectangle(Point.Empty,main.Size));bitmap.Save(Path.Combine(Output,(model.StartsWith("xtranslator")?"hy":"gemma")+"-"+index+".png"));}
-                        using(var wc=new WebClient()){wc.Proxy=null;File.WriteAllText(Path.Combine(Output,"loaded-after-"+(model.StartsWith("xtranslator")?"hy":"gemma")+"-"+index+".json"),wc.DownloadString("http://127.0.0.1:11434/api/ps"));}
+                        using(var bitmap=new Bitmap(main.Width,main.Height)){main.DrawToBitmap(bitmap,new Rectangle(Point.Empty,main.Size));bitmap.Save(Path.Combine(Output,(model.StartsWith("yichuang",StringComparison.OrdinalIgnoreCase)?"hy":"gemma")+"-"+index+".png"));}
+                        using(var wc=new WebClient()){wc.Proxy=null;File.WriteAllText(Path.Combine(Output,"loaded-after-"+(model.StartsWith("yichuang",StringComparison.OrdinalIgnoreCase)?"hy":"gemma")+"-"+index+".json"),wc.DownloadString("http://127.0.0.1:11434/api/ps"));}
                         index++;
                     }
                     Log.Add("Completed custom engine "+id+": "+model);Console.WriteLine(Log[Log.Count-1]);

@@ -24,12 +24,12 @@ class LanguageRealWebProbe
         using(var watchdog=new System.Threading.Timer(s=>Environment.Exit(124),null,240000,Timeout.Infinite))try{
             string exe=Path.GetFullPath(args[0]);Directory.SetCurrentDirectory(Path.GetDirectoryName(exe));
             AppDomain.CurrentDomain.AssemblyResolve+=(s,e)=>{string f=Path.Combine(Path.GetDirectoryName(exe),new AssemblyName(e.Name).Name+".dll");return File.Exists(f)?Assembly.LoadFrom(f):null;};
-            var app=Assembly.LoadFrom(exe);var registry=app.GetType("Xtranslator.EngineRegistry");var def=app.GetType("Xtranslator.EngineDefinition");
+            var app=Assembly.LoadFrom(exe);var registry=app.GetType("YiChuang.EngineRegistry");var def=app.GetType("YiChuang.EngineDefinition");
             Data=Path.Combine(Output,"isolated-data-"+Guid.NewGuid().ToString("N"));Directory.CreateDirectory(Data);
             var proxies=(object[])app.GetType("_63AF42A1").GetField("_71AC5D16").GetValue(null);proxies[318]=Delegate.CreateDelegate(proxies[318].GetType(),typeof(LanguageRealWebProbe).GetMethod("Folder"));
-            app.GetType("Xtranslator.Program").GetField("ProgramStarted").SetValue(null,new EventWaitHandle(false,EventResetMode.AutoReset));app.GetType("RebuildInfo").GetField("DiagnosticOutput",BindingFlags.Static|BindingFlags.NonPublic).SetValue(null,Output);
+            app.GetType("YiChuang.Program").GetField("ProgramStarted").SetValue(null,new EventWaitHandle(false,EventResetMode.AutoReset));app.GetType("RebuildInfo").GetField("DiagnosticOutput",BindingFlags.Static|BindingFlags.NonPublic).SetValue(null,Output);
             WebRequest.RegisterPrefix("http://",new Guard());WebRequest.RegisterPrefix("https://",new Guard());Application.EnableVisualStyles();
-            using(var main=(Form)Activator.CreateInstance(app.GetType("Xtranslator.Form2"))){
+            using(var main=(Form)Activator.CreateInstance(app.GetType("YiChuang.Form2"))){
                 main.Show();Application.DoEvents();Call(main,"SetCaptureMode",0,false);var source=(RichTextBox)Field(main,"rtb原文");var translated=(RichTextBox)Field(main,"rtb译文");var cancel=(ToolStripButton)Field(main,"localCancelButton");
                 foreach(int id in new[]{4,5}){
                     registry.GetMethod("SetVisible").Invoke(null,new object[]{id,true});source.Clear();Call(main,"RebuildEngineMenu");Call(main,"SelectManagedEngine",id);

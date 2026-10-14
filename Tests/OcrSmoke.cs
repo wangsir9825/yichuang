@@ -37,7 +37,7 @@ class OcrSmoke
                 form.GetMethod("stop_ocr").Invoke(null,null);
                 File.AppendAllText(report,"NativeCallOK="+ok+"\nResult="+result+"\n");
                 bool pipeOK=false;
-                using(var pipe=new System.IO.Pipes.NamedPipeServerStream("XTransNoLoginOcr2918",System.IO.Pipes.PipeDirection.InOut)) {
+                using(var pipe=new System.IO.Pipes.NamedPipeServerStream("YiChuangOcr2918",System.IO.Pipes.PipeDirection.InOut)) {
                     var server=System.Threading.Tasks.Task.Run(()=>{
                         pipe.WaitForConnection();byte[] bytes=new byte[4096];int count=pipe.Read(bytes,0,bytes.Length);
                         pipeOK=Encoding.UTF8.GetString(bytes,0,count)=="OCR pipe transfer test 2918";

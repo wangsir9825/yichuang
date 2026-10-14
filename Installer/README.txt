@@ -1,7 +1,7 @@
 ﻿译窗安装器构建
 
 1. 先运行 Build-LlamaRuntime.ps1 获取并校验锁定版本的官方 llama.cpp 运行包。
-   再运行 Build.ps1 和 Verify.ps1，确认 App 是本次要分发的 1.5.4 版本。
+   再运行 Build.ps1 和 Verify.ps1，确认 App 是本次要分发的 1.5.5 版本。
    内置组件来源、许可与哈希见 llama-runtime-notes.txt、App/llama/runtime-manifest.json。
 2. 安装或解压 Inno Setup 6.7+，将 ISCC.exe 路径传给 Build-Installer.ps1 -CompilerPath。
    本次使用 Tools.InnoSetup NuGet 6.7.3 中未修改且签名有效的编译器。

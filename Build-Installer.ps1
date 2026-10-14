@@ -5,7 +5,7 @@ if(-not $CompilerPath){$CompilerPath=Join-Path $root 'Build\InstallerTools\Inno\
 if(-not(Test-Path -LiteralPath $CompilerPath)){throw '需要 Inno Setup 6.7 或更新版本；使用 -CompilerPath 指定 ISCC.exe。'}
 $exe=Join-Path $root 'App\YiChuang.exe'
 $version=[Diagnostics.FileVersionInfo]::GetVersionInfo($exe).ProductVersion
-if($version -ne '1.5.4.0' -and $version -ne '1.5.4'){throw '请先构建译窗 1.5.4。'}
+if($version -ne '1.5.5.0' -and $version -ne '1.5.5'){throw '请先构建译窗 1.5.5。'}
 $runtimeRoot=Join-Path $root 'App\llama'
 $runtimeManifest=Join-Path $runtimeRoot 'runtime-manifest.json'
 if(-not(Test-Path -LiteralPath $runtimeManifest)){throw '缺少内置 llama.cpp，请先运行 Build-LlamaRuntime.ps1。'}
@@ -17,7 +17,7 @@ foreach($entry in $runtime.files){
     if(-not(Test-Path -LiteralPath $runtimeFile) -or (Get-FileHash -LiteralPath $runtimeFile -Algorithm SHA256).Hash -ne $entry.sha256){throw ('运行组件缺失或被修改：'+$entry.name)}
 }
 
-$output=Join-Path $root 'Packages\YiChuang-Setup-1.5.4.exe'
+$output=Join-Path $root 'Packages\YiChuang-Setup-1.5.5.exe'
 if(Test-Path -LiteralPath $output){throw '安装包已存在；请先提升版本号，保留原交付文件。'}
 $manifest=@()
 foreach($name in @('dotnet48.exe','vc_redist.x64.exe')){

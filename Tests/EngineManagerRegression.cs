@@ -82,13 +82,13 @@ class EngineManagerRegression
         using(var watchdog=new System.Threading.Timer(s=>{File.WriteAllLines(Path.Combine(Output,"engine-manager-regression.txt"),Log);Environment.Exit(124);},null,95000,Timeout.Infinite))try{
             string exe=Path.GetFullPath(args[0]);Directory.SetCurrentDirectory(Path.GetDirectoryName(exe));
             AppDomain.CurrentDomain.AssemblyResolve+=(s,e)=>{string f=Path.Combine(Path.GetDirectoryName(exe),new AssemblyName(e.Name).Name+".dll");return File.Exists(f)?Assembly.LoadFrom(f):null;};
-            App=Assembly.LoadFrom(exe);Registry=App.GetType("Xtranslator.EngineRegistry");Definition=App.GetType("Xtranslator.EngineDefinition");Config=App.GetType("Xtranslator.ClassMain");
+            App=Assembly.LoadFrom(exe);Registry=App.GetType("YiChuang.EngineRegistry");Definition=App.GetType("YiChuang.EngineDefinition");Config=App.GetType("YiChuang.ClassMain");
             Data=args.Length>3?args[3]:Path.Combine(Output,"isolated-data-"+Guid.NewGuid().ToString("N"));Directory.CreateDirectory(Data);
             var proxies=(object[])App.GetType("_63AF42A1").GetField("_71AC5D16").GetValue(null);proxies[318]=Delegate.CreateDelegate(proxies[318].GetType(),typeof(EngineManagerRegression).GetMethod("Folder"));
-            App.GetType("Xtranslator.Program").GetField("ProgramStarted").SetValue(null,new EventWaitHandle(false,EventResetMode.AutoReset));App.GetType("RebuildInfo").GetField("DiagnosticOutput",BindingFlags.Static|BindingFlags.NonPublic).SetValue(null,Output);
+            App.GetType("YiChuang.Program").GetField("ProgramStarted").SetValue(null,new EventWaitHandle(false,EventResetMode.AutoReset));App.GetType("RebuildInfo").GetField("DiagnosticOutput",BindingFlags.Static|BindingFlags.NonPublic).SetValue(null,Output);
             var listener=new TcpListener(IPAddress.Loopback,0);listener.Start();Port=((IPEndPoint)listener.LocalEndpoint).Port;Task.Run(()=>Serve(listener));WebRequest.RegisterPrefix("https://",new Guard());WebRequest.RegisterPrefix("http://",new Guard());
             Application.EnableVisualStyles();
-            using(var main=(Form)Activator.CreateInstance(App.GetType("Xtranslator.Form2"))){
+            using(var main=(Form)Activator.CreateInstance(App.GetType("YiChuang.Form2"))){
                 main.Opacity=0;main.Show();Application.DoEvents();
                 if(args.Length>3){Check(Reg("Get",6)==null,"Removed built-in reappeared after restart");var ids=(int[])Registry.GetProperty("ActiveIds").GetValue(null,null);Check(ids.Length==8&&ids.Any(id=>id>=1000),"Custom registry not restored");int selected=(int)Config.GetField("isjiekounum").GetValue(null);Check(selected>=1000&&Read(Reg("Get",selected),"Name").ToString()=="Persisted engine","Selected custom engine lost");Check(Read(Reg("Get",selected),"ApiKey").ToString()=="test-only-key-12345","Key lost");Check(Requests==0,"Restart sent a request");main.Close();File.WriteAllText(Path.Combine(Output,"restart-pass.txt"),"Custom definition, key, selected ID, removed built-in and dynamic menu restored in new process; no network request.");return 0;}
                 var source=(RichTextBox)Field(main,"rtb原文");var target=(RichTextBox)Field(main,"rtb译文");
@@ -109,14 +109,14 @@ class EngineManagerRegression
                 }
                 Log.Add("Custom Gemini/Qwen-MT/DeepL use their dedicated payloads/adapters: passed");
                 string localUrl="http://127.0.0.1:"+Port;var localA=New("Local A","ollama",localUrl,"local-a:latest");Write(localA,"Prompt","hy");var localB=New("Local B","ollama",localUrl,"local-b:latest");Write(localB,"Prompt","gemma");int idA=(int)Reg("Save",localA),idB=(int)Reg("Save",localB);
-                var installed=(string[])App.GetType("Xtranslator.LocalModelClient").GetMethod("ListInstalled").Invoke(null,new object[]{localUrl,new Func<bool>(()=>true)});Check(installed.Length==2&&!installed.Contains("remote:latest"),"Remote model offered as local");
+                var installed=(string[])App.GetType("YiChuang.LocalModelClient").GetMethod("ListInstalled").Invoke(null,new object[]{localUrl,new Func<bool>(()=>true)});Check(installed.Length==2&&!installed.Contains("remote:latest"),"Remote model offered as local");
                 Call(main,"RebuildEngineMenu");Call(main,"SelectManagedEngine",idA);Call(main,"xianshiyuanwen","word");Wait(()=>target.Text=="local-a:latest:word");source.Clear();Call(main,"SelectManagedEngine",idB);source.Text="本地句子。";Wait(()=>target.Text=="local-b:latest:本地句子。");Check(Unloads==1&&Overlap==0&&Chats==2,"Local models overlapped");
                 source.Clear();Reg("Remove",idB);Call(main,"RebuildEngineMenu");Call(main,"SelectManagedEngine",idA);source.Text="switch after remove";Wait(()=>target.Text=="local-a:latest:switch after remove");Check(Unloads==2&&Deletes==0,"Removed local model was not released or weights deleted");
                 source.Clear();var localEdit=Reg("Get",idA);Write(localEdit,"Model","missing:latest");Reg("Save",localEdit);source.Text="missing";Wait(()=>target.Text.Contains("尚未下载"));Check(Chats==3,"Missing model generated");
                 source.Clear();Reg("Remove",idA);Log.Add("Custom Ollama installed list filters remote models; words and switch use selected model; removed running model released, zero weight deletes; missing model error: passed");
                 var bad=New("Bad","openai","http://example.com/v1","model");Check(Error(()=>Reg("Save",bad)).Contains("HTTPS"),"Unsafe URL accepted");Write(bad,"Endpoint","https://example.com/v1/chat/completions");Check(Error(()=>Reg("Save",bad)).Contains("基础地址"),"Full URL silently doubled");
                 string before=Reg("Export").ToString();Reg("Import","{broken");Check(((int[])Registry.GetProperty("ActiveIds").GetValue(null,null)).Length==0&&Reg("Export").ToString()=="{broken","Corruption reset to cloud or destroyed recovery data");Reg("Import",before);
-                using(var settings=(Form)Activator.CreateInstance(App.GetType("Xtranslator.Frmsetting"))){
+                using(var settings=(Form)Activator.CreateInstance(App.GetType("YiChuang.Frmsetting"))){
                     settings.Opacity=0;settings.Show(main);Application.DoEvents();settings.GetType().GetMethod("ShowPage").Invoke(settings,new object[]{"引擎管理"});Application.DoEvents();Render(settings,"engine-manager-native.png");var list=(ListBox)settings.Controls.Find("ManagedEngines",true)[0];Check(list.Items.Count==9,"Settings registry list incorrect");Check(settings.Controls.Find("SaveSettings",true)[0].Visible,"Settings save hidden");
                     // Exercise the actual Add -> modal draft -> installed list -> OK -> manager event chain.
                     using(var timer=new System.Windows.Forms.Timer()){
@@ -130,14 +130,14 @@ class EngineManagerRegression
                     Check(list.Items.Count==10,"Add form did not update manager");int added=(int)Read(list.SelectedItem,"Id");Check(Read(Reg("Get",added),"Model").ToString()=="local-a:latest"&&Read(Reg("Get",added),"Prompt").ToString()=="hy","Installed-model selection not saved");
                     ((Button)settings.Controls.Find("SaveSettings",true)[0]).PerformClick();Check(settings.IsDisposed,"Save and close did not close settings");Reg("Remove",added);
                 }
-                using(var editor=(Form)Activator.CreateInstance(App.GetType("Xtranslator.EngineEditorForm"),new object[]{null})){
+                using(var editor=(Form)Activator.CreateInstance(App.GetType("YiChuang.EngineEditorForm"),new object[]{null})){
                     editor.Opacity=0;editor.Show(main);Application.DoEvents();var type=(ComboBox)editor.Controls.Find("EngineProvider",true)[0];
                     for(int i=0;i<5;i++){type.SelectedIndex=i;Application.DoEvents();Render(editor,"engine-editor-"+i+".png");Check(editor.Controls.Find("SaveEngine",true)[0].Visible,"Editor save hidden");}
                     type.SelectedIndex=0;Application.DoEvents();Check(((TextBox)editor.Controls.Find("EngineApiKey",true)[0]).UseSystemPasswordChar,"Key unmasked");editor.Close();
                 }
                 Log.Add("Configuration validation, corrupt-state recovery, actual native Add/installed-list/select/OK/manager/save-close event chain, and all five editor types with fixed footer/masked keys: passed");
                 var persisted=Reg("Get",idCustom);Write(persisted,"Name","Persisted engine");Write(persisted,"Model","edited-model");Reg("Save",persisted);Reg("Remove",6);Call(main,"RebuildEngineMenu");Call(main,"SelectManagedEngine",idCustom);Config.GetMethod("jiluset").Invoke(null,null);Check(Config.GetField("SettingsSaveError").GetValue(null)==null,"Save error");
-                string configPath=Path.Combine(Data,"Xtranslator-NoLogin-2.9.18B","setting.txt");Check(!File.ReadAllText(configPath).Contains("test-only-key-12345"),"Plaintext key persisted");string saved=(string)Config.GetMethod("readJiekou").Invoke(null,null);Reg("Import",new object[]{null});Config.GetMethod("read_setSetting").Invoke(null,new object[]{saved});Check(Reg("Get",6)==null&&Read(Reg("Get",idCustom),"Model").ToString()=="edited-model","Registry encrypted save/read failed");
+                string configPath=Path.Combine(Data,"YiChuang","setting.txt");Check(!File.ReadAllText(configPath).Contains("test-only-key-12345"),"Plaintext key persisted");string saved=(string)Config.GetMethod("readJiekou").Invoke(null,null);Reg("Import",new object[]{null});Config.GetMethod("read_setSetting").Invoke(null,new object[]{saved});Check(Reg("Get",6)==null&&Read(Reg("Get",idCustom),"Model").ToString()=="edited-model","Registry encrypted save/read failed");
                 File.WriteAllText(Path.Combine(Output,"restart-data-path.txt"),Data);main.Close();
             }
             listener.Stop();Check(Unexpected==0&&Deletes==0,"Unexpected request or model deletion");Log.Add("Encrypted registry and edited model save/read; no external API/weight deletion requests: passed");File.WriteAllLines(Path.Combine(Output,"engine-manager-regression.txt"),Log);return 0;

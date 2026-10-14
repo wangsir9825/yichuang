@@ -85,15 +85,15 @@ class CloudEngineRegression
         {
             string exe=Path.GetFullPath(args[0]);Directory.SetCurrentDirectory(Path.GetDirectoryName(exe));
             AppDomain.CurrentDomain.AssemblyResolve+=(s,e)=>{string f=Path.Combine(Path.GetDirectoryName(exe),new AssemblyName(e.Name).Name+".dll");return File.Exists(f)?Assembly.LoadFrom(f):null;};
-            var app=Assembly.LoadFrom(exe);Type config=app.GetType("Xtranslator.ClassMain"),client=app.GetType("Xtranslator.CloudTranslationClient");
+            var app=Assembly.LoadFrom(exe);Type config=app.GetType("YiChuang.ClassMain"),client=app.GetType("YiChuang.CloudTranslationClient");
             Data=Path.Combine(Output,"isolated-data-"+Guid.NewGuid().ToString("N"));Directory.CreateDirectory(Data);
             var proxies=(object[])app.GetType("_63AF42A1").GetField("_71AC5D16").GetValue(null);proxies[318]=Delegate.CreateDelegate(proxies[318].GetType(),typeof(CloudEngineRegression).GetMethod("Folder"));
-            app.GetType("Xtranslator.Program").GetField("ProgramStarted").SetValue(null,new EventWaitHandle(false,EventResetMode.AutoReset));
+            app.GetType("YiChuang.Program").GetField("ProgramStarted").SetValue(null,new EventWaitHandle(false,EventResetMode.AutoReset));
             app.GetType("RebuildInfo").GetField("DiagnosticOutput",BindingFlags.Static|BindingFlags.NonPublic).SetValue(null,Output);
             var listener=new TcpListener(IPAddress.Loopback,0);listener.Start();Port=((IPEndPoint)listener.LocalEndpoint).Port;Task.Run(()=>Serve(listener));
             WebRequest.RegisterPrefix("https://",new Guard());WebRequest.RegisterPrefix("http://",new Guard());
-            Application.EnableVisualStyles();var main=(Form)Activator.CreateInstance(app.GetType("Xtranslator.Form2"));main.Opacity=0;main.Show();Application.DoEvents();
-            foreach(int engineId in new[]{4,5,6,14,16,17,18,19})app.GetType("Xtranslator.EngineRegistry").GetMethod("SetVisible").Invoke(null,new object[]{engineId,true});
+            Application.EnableVisualStyles();var main=(Form)Activator.CreateInstance(app.GetType("YiChuang.Form2"));main.Opacity=0;main.Show();Application.DoEvents();
+            foreach(int engineId in new[]{4,5,6,14,16,17,18,19})app.GetType("YiChuang.EngineRegistry").GetMethod("SetVisible").Invoke(null,new object[]{engineId,true});
             main.GetType().GetMethod("RebuildEngineMenu",BindingFlags.Instance|BindingFlags.NonPublic).Invoke(main,null);
 
             var source=(RichTextBox)Member(main,"rtb原文");var target=(RichTextBox)Member(main,"rtb译文");
@@ -101,7 +101,7 @@ class CloudEngineRegression
             foreach(int engine in new[]{1,3,8,9,10,11,12,13})Assert(!(bool)allowed.Invoke(null,new object[]{engine}),"Removed engine remains allowed");
             foreach(string name in new[]{"百度翻译引擎","学术翻译引擎","火山翻译","小牛翻译","a百度千帆AI翻译","b智谱AI翻译","csiliconFlowAI翻译","d字节豆包AI翻译"})
                 Assert(main.GetType().GetField(name+"ToolStripMenuItem",Private)==null,"Removed menu remains compiled");
-            using(var settings=(Form)Activator.CreateInstance(app.GetType("Xtranslator.Frmsetting")))
+            using(var settings=(Form)Activator.CreateInstance(app.GetType("YiChuang.Frmsetting")))
             {
                 settings.Opacity=0;settings.Show(main);Application.DoEvents();
                 var tree=(FlowLayoutPanel)settings.Controls.Find("SettingsNavigation",true)[0];Assert(tree.Controls.Count==5&&((string[])settings.GetType().GetProperty("SettingsPageTitles").GetValue(settings,null)).Length==10,"Settings pages did not remove eight/add two");
@@ -126,9 +126,9 @@ class CloudEngineRegression
             Assert(Capture().Contains("Simplified Chinese"),"Gemini target direction absent");
             source.Text="";Select(main,19);main.GetType().GetMethod("xianshiyuanwen",Private).Invoke(main,new object[]{"你好"});Wait(()=>target.Text=="Qwen译文：你好");
             Assert(Capture().Contains("\"source_lang\":\"auto\"")&&Capture().Contains("\"target_lang\":\"English\""),"Qwen language names/options incorrect");
-            app.GetType("Xtranslator.TranslationDirection").GetField("Mode").SetValue(null,"to-zh");source.Text="English sentence.";Wait(()=>target.Text=="Qwen译文：English sentence.");
+            app.GetType("YiChuang.TranslationDirection").GetField("Mode").SetValue(null,"to-zh");source.Text="English sentence.";Wait(()=>target.Text=="Qwen译文：English sentence.");
             Assert(Capture().Contains("\"target_lang\":\"Chinese\""),"Qwen en-zh direction incorrect");
-            app.GetType("Xtranslator.TranslationDirection").GetField("Mode").SetValue(null,"to-en");source.Text="";Select(main,18);source.Text="这是中文。";Wait(()=>target.Text=="Gemini译文：这是中文。");Assert(Capture().Contains("into English"),"Gemini zh-en direction incorrect");
+            app.GetType("YiChuang.TranslationDirection").GetField("Mode").SetValue(null,"to-en");source.Text="";Select(main,18);source.Text="这是中文。";Wait(()=>target.Text=="Gemini译文：这是中文。");Assert(Capture().Contains("into English"),"Gemini zh-en direction incorrect");
             Log.Add("Gemini/Qwen bilingual and captured words use selected provider; authentic API headers/schema, Unicode/newline preserved, thoughts excluded, no dictionary/cloud fallback: passed");
             source.Text="slow old";Wait(()=>Capture().Contains("slow old"));source.Text="fresh new";Wait(()=>target.Text=="Gemini译文：fresh new");
             source.Text="slow cancel";Wait(()=>Capture().Contains("slow cancel"));((ToolStripButton)Member(main,"localCancelButton")).PerformClick();Wait(()=>target.Text.Contains("已取消"));Thread.Sleep(1200);Application.DoEvents();Assert(target.Text.Contains("已取消"),"Cancelled cloud result overwrites UI");

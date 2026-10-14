@@ -8,7 +8,7 @@ if (-not $OllamaPath -or -not (Test-Path -LiteralPath $OllamaPath)) {
 & (Join-Path $PSScriptRoot 'Start-LocalService.ps1') -OllamaPath $OllamaPath
 & $OllamaPath pull 'kaelri/hy-mt2:7b'
 if ($LASTEXITCODE -ne 0) { throw 'Hy-MT2 download failed. Run this script again to resume.' }
-& $OllamaPath create 'xtranslator-hy-mt2:7b-q6' -f (Join-Path $PSScriptRoot 'Local-Hy-MT2.Modelfile')
+& $OllamaPath create 'yichuang-hy-mt2:7b-q6' -f (Join-Path $PSScriptRoot 'Local-Hy-MT2.Modelfile')
 if ($LASTEXITCODE -ne 0) { throw 'Hy-MT2 prompt-template setup failed.' }
 & $OllamaPath pull 'translategemma:12b'
 if ($LASTEXITCODE -ne 0) { throw 'TranslateGemma download failed. Run this script again to resume.' }

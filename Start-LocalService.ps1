@@ -13,7 +13,7 @@ $existingTags=$null
 try { $existingTags=Invoke-RestMethod 'http://127.0.0.1:11434/api/tags' -TimeoutSec 2 } catch {}
 if($null -ne $existingTags){Confirm-Models $existingTags; return}
 $options=$null
-$optionsFile=Join-Path $env:APPDATA 'Xtranslator-NoLogin-2.9.18B\local-runtime.json'
+$optionsFile=Join-Path $env:APPDATA 'YiChuang\local-runtime.json'
 if(Test-Path -LiteralPath $optionsFile){try{$options=Get-Content -LiteralPath $optionsFile -Raw | ConvertFrom-Json}catch{}}
 $candidates=[Collections.Generic.List[string]]::new()
 if($OllamaPath){$candidates.Add($OllamaPath)}
@@ -36,7 +36,7 @@ if(-not $ModelsDirectory){$ModelsDirectory=[Environment]::GetEnvironmentVariable
 if(-not $ModelsDirectory){$ModelsDirectory=Join-Path $env:USERPROFILE '.ollama\models'}
 $ModelsDirectory=[IO.Path]::GetFullPath([Environment]::ExpandEnvironmentVariables($ModelsDirectory))
 [IO.Directory]::CreateDirectory($ModelsDirectory) | Out-Null
-$runtimeLogs=Join-Path $env:APPDATA 'Xtranslator-NoLogin-2.9.18B\LocalRuntime'
+$runtimeLogs=Join-Path $env:APPDATA 'YiChuang\LocalRuntime'
 [IO.Directory]::CreateDirectory($runtimeLogs) | Out-Null
 $previousModels=$env:OLLAMA_MODELS; $previousHost=$env:OLLAMA_HOST; $previousCloud=$env:OLLAMA_NO_CLOUD
 try {

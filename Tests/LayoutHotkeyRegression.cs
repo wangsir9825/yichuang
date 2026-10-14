@@ -31,13 +31,13 @@ class LayoutHotkeyRegression
         try {
             string exe=Path.GetFullPath(args[0]);Directory.SetCurrentDirectory(Path.GetDirectoryName(exe));
             AppDomain.CurrentDomain.AssemblyResolve+=(s,e)=>{string file=Path.Combine(Path.GetDirectoryName(exe),new AssemblyName(e.Name).Name+".dll");return File.Exists(file)?Assembly.LoadFrom(file):null;};
-            App=Assembly.LoadFrom(exe);Config=App.GetType("Xtranslator.ClassMain");Prefs=App.GetType("Xtranslator.UiPreferences");KeysType=App.GetType("Xtranslator.ClassSetHotKey");
+            App=Assembly.LoadFrom(exe);Config=App.GetType("YiChuang.ClassMain");Prefs=App.GetType("YiChuang.UiPreferences");KeysType=App.GetType("YiChuang.ClassSetHotKey");
             bool probe=args.Length>3&&args[2]=="--read";Data=probe?Path.GetFullPath(args[3]):Path.Combine(output,"isolated-data-"+Guid.NewGuid().ToString("N"));Directory.CreateDirectory(Data);
             var proxies=(object[])App.GetType("_63AF42A1").GetField("_71AC5D16").GetValue(null);proxies[318]=Delegate.CreateDelegate(proxies[318].GetType(),typeof(LayoutHotkeyRegression).GetMethod("Folder"));
-            App.GetType("Xtranslator.Program").GetField("ProgramStarted").SetValue(null,new EventWaitHandle(false,EventResetMode.AutoReset));
+            App.GetType("YiChuang.Program").GetField("ProgramStarted").SetValue(null,new EventWaitHandle(false,EventResetMode.AutoReset));
             App.GetType("RebuildInfo").GetField("DiagnosticOutput",Static).SetValue(null,output);
             WebRequest.RegisterPrefix("http://",new Guard());WebRequest.RegisterPrefix("https://",new Guard());Application.EnableVisualStyles();
-            using(var main=(Form)Activator.CreateInstance(App.GetType("Xtranslator.Form2"))){
+            using(var main=(Form)Activator.CreateInstance(App.GetType("YiChuang.Form2"))){
                 main.Opacity=0;main.Show();Application.DoEvents();main.GetType().GetField("_isInitializing",Private).SetValue(main,true);
                 var split=(SplitContainer)Field(main,"splitContainer1");var source=(RichTextBox)Field(main,"rtb原文");var target=(RichTextBox)Field(main,"rtb译文");
                 if(probe){

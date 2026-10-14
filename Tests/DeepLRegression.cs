@@ -53,23 +53,23 @@ class DeepLRegression
                 string path=Path.Combine(Path.GetDirectoryName(exe),new AssemblyName(e.Name).Name+".dll");
                 return File.Exists(path)?Assembly.LoadFrom(path):null;
             };
-            Assembly app=Assembly.LoadFrom(exe);Type main=app.GetType("Xtranslator.ClassMain");
+            Assembly app=Assembly.LoadFrom(exe);Type main=app.GetType("YiChuang.ClassMain");
             IsolatedData=Path.Combine(output,"isolated-data-"+Guid.NewGuid().ToString("N"));Directory.CreateDirectory(IsolatedData);
             var proxies=(object[])app.GetType("_63AF42A1").GetField("_71AC5D16").GetValue(null);
             proxies[318]=Delegate.CreateDelegate(proxies[318].GetType(),typeof(DeepLRegression).GetMethod("Folder"));
             WebRequest.RegisterPrefix("https://",new MockRequest()); WebRequest.RegisterPrefix("http://",new MockRequest());
             ServicePointManager.Expect100Continue=false;WebRequest.DefaultWebProxy=null;
-            app.GetType("Xtranslator.Program").GetField("ProgramStarted").SetValue(null,new EventWaitHandle(false,EventResetMode.AutoReset));
+            app.GetType("YiChuang.Program").GetField("ProgramStarted").SetValue(null,new EventWaitHandle(false,EventResetMode.AutoReset));
             app.GetType("RebuildInfo").GetField("DiagnosticOutput",BindingFlags.NonPublic|BindingFlags.Static).SetValue(null,output);
             Application.EnableVisualStyles();
-            Form form=(Form)Activator.CreateInstance(app.GetType("Xtranslator.Form2"));form.Opacity=0;form.Show();Application.DoEvents();
-            foreach(int engineId in new[]{4,5,6,14,16,17,18,19})app.GetType("Xtranslator.EngineRegistry").GetMethod("SetVisible").Invoke(null,new object[]{engineId,true});
+            Form form=(Form)Activator.CreateInstance(app.GetType("YiChuang.Form2"));form.Opacity=0;form.Show();Application.DoEvents();
+            foreach(int engineId in new[]{4,5,6,14,16,17,18,19})app.GetType("YiChuang.EngineRegistry").GetMethod("SetVisible").Invoke(null,new object[]{engineId,true});
             form.GetType().GetMethod("RebuildEngineMenu",BindingFlags.Instance|BindingFlags.NonPublic).Invoke(form,null);
 
             Stage("Main form loaded");
             Set(main,"isjiekounum",6); Set(main,"DeeplInterface","2");Set(main,"DeeplLanguage","1");
             Set(main,"DeeplFromLang","en");Set(main,"DeeplToLang","zh");
-            Form settings=(Form)Activator.CreateInstance(app.GetType("Xtranslator.Frmsetting"));settings.Opacity=0;settings.Show(form);
+            Form settings=(Form)Activator.CreateInstance(app.GetType("YiChuang.Frmsetting"));settings.Opacity=0;settings.Show(form);
             settings.GetType().GetMethod("ShowPage").Invoke(settings,new object[]{"3：DeepL 官方API翻译"});Application.DoEvents();
             Stage("DeepL settings loaded");
             TextBox key=null;Button save=null;
@@ -111,14 +111,14 @@ class DeepLRegression
             log.Add("Single word uses the selected DeepL engine: passed");
             Stage(log[log.Count-1]);
             string unusual="第一行\nSecond line: C:\\temp\\file \"quoted\"";
-            string result=(string)app.GetType("Xtranslator.Form2").GetMethod("apiDeepl").Invoke(null,new object[]{unusual,"api-free.deepl.com","local-test-key:fx"});
+            string result=(string)app.GetType("YiChuang.Form2").GetMethod("apiDeepl").Invoke(null,new object[]{unusual,"api-free.deepl.com","local-test-key:fx"});
             Assert(result.Contains("你好"),"Unicode request did not return a translation");
             var body4=Json.Deserialize<Dictionary<string,object>>(Bodies[3]);
             Assert(((System.Collections.IList)body4["text"])[0].ToString()==unusual,"Newlines, quotes, or backslashes did not survive JSON encoding");
             Assert(!body4.ContainsKey("source_lang"),"Automatic mode forced a source language");
             log.Add("Unicode, newline, quote, and backslash JSON encoding: passed");
             Stage(log[log.Count-1]);
-            try {app.GetType("Xtranslator.Form2").GetMethod("apiDeepl").Invoke(null,new object[]{"Quota test","api-free.deepl.com","local-test-key:fx"});throw new Exception("Quota error was swallowed");}
+            try {app.GetType("YiChuang.Form2").GetMethod("apiDeepl").Invoke(null,new object[]{"Quota test","api-free.deepl.com","local-test-key:fx"});throw new Exception("Quota error was swallowed");}
             catch(TargetInvocationException ex){Assert(ex.InnerException.Message.Contains("456"),"Quota error lacks HTTP status");}
             Assert(server.Wait(1000),"Mock server did not finish");listener.Stop();
             log.Add("HTTP 456 quota error is actionable: passed");

@@ -90,22 +90,22 @@ class LanguageDirectionRegression
         using(var watchdog=new System.Threading.Timer(s=>{File.WriteAllLines(Path.Combine(Output,"language-direction-regression.txt"),Log);Environment.Exit(124);},null,90000,Timeout.Infinite))try{
             string exe=Path.GetFullPath(args[0]);Directory.SetCurrentDirectory(Path.GetDirectoryName(exe));
             AppDomain.CurrentDomain.AssemblyResolve+=(s,e)=>{string f=Path.Combine(Path.GetDirectoryName(exe),new AssemblyName(e.Name).Name+".dll");return File.Exists(f)?Assembly.LoadFrom(f):null;};
-            App=Assembly.LoadFrom(exe);Registry=App.GetType("Xtranslator.EngineRegistry");Definition=App.GetType("Xtranslator.EngineDefinition");Config=App.GetType("Xtranslator.ClassMain");
+            App=Assembly.LoadFrom(exe);Registry=App.GetType("YiChuang.EngineRegistry");Definition=App.GetType("YiChuang.EngineDefinition");Config=App.GetType("YiChuang.ClassMain");
             Data=args.Length>3?args[3]:Path.Combine(Output,"isolated-data-"+Guid.NewGuid().ToString("N"));Directory.CreateDirectory(Data);
             var proxies=(object[])App.GetType("_63AF42A1").GetField("_71AC5D16").GetValue(null);proxies[318]=Delegate.CreateDelegate(proxies[318].GetType(),typeof(LanguageDirectionRegression).GetMethod("Folder"));
-            App.GetType("Xtranslator.Program").GetField("ProgramStarted").SetValue(null,new EventWaitHandle(false,EventResetMode.AutoReset));App.GetType("RebuildInfo").GetField("DiagnosticOutput",BindingFlags.Static|BindingFlags.NonPublic).SetValue(null,Output);
+            App.GetType("YiChuang.Program").GetField("ProgramStarted").SetValue(null,new EventWaitHandle(false,EventResetMode.AutoReset));App.GetType("RebuildInfo").GetField("DiagnosticOutput",BindingFlags.Static|BindingFlags.NonPublic).SetValue(null,Output);
             var listener=new TcpListener(IPAddress.Loopback,0);listener.Start();Port=((IPEndPoint)listener.LocalEndpoint).Port;Task.Run(()=>Serve(listener));WebRequest.RegisterPrefix("https://",new Guard());WebRequest.RegisterPrefix("http://",new Guard());
             Application.EnableVisualStyles();
-            using(var main=(Form)Activator.CreateInstance(App.GetType("Xtranslator.Form2"))){
+            using(var main=(Form)Activator.CreateInstance(App.GetType("YiChuang.Form2"))){
                 main.Opacity=0;main.Show();Application.DoEvents();Call(main,"SetCaptureMode",0,false);
                 if(args.Length>3){
-                    Check(Ids("VisibleIds").SequenceEqual(new[]{18,5}),"Checkbox/order did not survive restart");Check(App.GetType("Xtranslator.TranslationDirection").GetField("Mode").GetValue(null).ToString()=="to-en","Direction did not survive restart");Check((int)Config.GetField("isjiekounum").GetValue(null)==18,"Selected engine changed after restart");Check(Ids("ActiveIds").Length==8&&Reg("Get",16)!=null,"Hidden model config removed");Check(Requests==0,"Restart sent network requests");main.Close();File.WriteAllText(Path.Combine(Output,"restart-pass.txt"),"Global direction + checkbox states + order + current engine survive new process; hidden configurations preserved; zero requests.");return 0;
+                    Check(Ids("VisibleIds").SequenceEqual(new[]{18,5}),"Checkbox/order did not survive restart");Check(App.GetType("YiChuang.TranslationDirection").GetField("Mode").GetValue(null).ToString()=="to-en","Direction did not survive restart");Check((int)Config.GetField("isjiekounum").GetValue(null)==18,"Selected engine changed after restart");Check(Ids("ActiveIds").Length==8&&Reg("Get",16)!=null,"Hidden model config removed");Check(Requests==0,"Restart sent network requests");main.Close();File.WriteAllText(Path.Combine(Output,"restart-pass.txt"),"Global direction + checkbox states + order + current engine survive new process; hidden configurations preserved; zero requests.");return 0;
                 }
                 var source=(RichTextBox)Field(main,"rtb原文");var target=(RichTextBox)Field(main,"rtb译文");
                 Check(Ids("VisibleIds").SequenceEqual(new[]{4,5,14,18}),"Wrong default four engines");Check(Ids("ActiveIds").Length==8,"Default hides lost configurations");
                 var dir=(ToolStripDropDownButton)Field(main,"directionButton");var engine=(ToolStripDropDownButton)Field(main,"toolStripDropDownButton1");
                 Check(dir.Owner==Field(main,"sourceStrip")&&engine.Owner==Field(main,"targetStrip"),"Selectors not over correct panes");Check(dir.DropDownItems.Count==3,"Direction should have exactly three modes");
-                using(var settings=(Form)Activator.CreateInstance(App.GetType("Xtranslator.Frmsetting"))){
+                using(var settings=(Form)Activator.CreateInstance(App.GetType("YiChuang.Frmsetting"))){
                     settings.Opacity=0;settings.Show(main);settings.GetType().GetMethod("ShowPage").Invoke(settings,new object[]{"引擎管理"});Application.DoEvents();
                     var list=(CheckedListBox)settings.Controls.Find("ManagedEngines",true)[0];Check(list.CheckedItems.Count==4,"Default checkbox mismatch");
                     list.SetItemChecked(4,true);Check((bool)Reg("IsVisible",16),"Check did not show local model");list.SetItemChecked(4,false);Application.DoEvents();Check(Reg("Get",16)!=null&&!(bool)Reg("IsVisible",16),"Uncheck removed model config");
@@ -114,7 +114,7 @@ class LanguageDirectionRegression
                     Render(settings,"checked-engine-manager.png");((Button)settings.Controls.Find("SaveSettings",true)[0]).PerformClick();Check(settings.IsDisposed,"Save settings failed");
                 }
                 foreach(string layout in new[]{"wide","compact"}){
-                    App.GetType("Xtranslator.UiPreferences").GetField("Layout",BindingFlags.Static|BindingFlags.NonPublic).SetValue(null,layout);Call(main,"ApplyModernLayout",true);Application.DoEvents();
+                    App.GetType("YiChuang.UiPreferences").GetField("Layout",BindingFlags.Static|BindingFlags.NonPublic).SetValue(null,layout);Call(main,"ApplyModernLayout",true);Application.DoEvents();
                     foreach(var item in new[]{dir,engine}){Check(item.Visible&&item.Owner.ClientRectangle.Contains(item.Bounds),"Selector clipped in "+layout);Check(item.ShowDropDownArrow&&!string.IsNullOrWhiteSpace(item.ToolTipText),"Selector arrow/tooltip absent");}
                     Render(main,"selectors-"+layout+".png");
                 }

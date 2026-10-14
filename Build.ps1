@@ -11,7 +11,7 @@ $buildDir=Join-Path $packageRoot 'Build'
 $framework=Join-Path $env:WINDIR 'Microsoft.NET\Framework\v4.0.30319'
 $appDir=Join-Path $packageRoot 'App'
 function Assert-AppStopped {
-    $busy=@(Get-CimInstance Win32_Process | Where-Object {$_.ExecutablePath -and ([IO.Path]::GetDirectoryName($_.ExecutablePath) -eq $appDir) -and $_.Name -match '^(YiChuang|wxocr|XtransNoLogin-.+-mode)\.exe$'})
+    $busy=@(Get-CimInstance Win32_Process | Where-Object {$_.ExecutablePath -and ([IO.Path]::GetDirectoryName($_.ExecutablePath) -eq $appDir) -and $_.Name -match '^(YiChuang|wxocr|YiChuang-.+-mode)\.exe$'})
     if($busy.Count){throw '本目录程序或辅助工具仍在运行；构建已停止，现有App未更改。请先关闭译窗。'}
 }
 Assert-AppStopped
@@ -38,9 +38,9 @@ function Invoke-Rebuild([string]$Name,[string]$SourceDir,[string]$Platform,[stri
     if($LASTEXITCODE -ne 0){throw ('Compilation failed: '+$Name)}
 }
 & (Join-Path $packageRoot 'Build-UiAssets.ps1')
-Invoke-Rebuild 'YiChuang.exe' (Join-Path $packageRoot 'Source\Main') 'x86' '7.3' 'Xtranslator.Program' $true
+Invoke-Rebuild 'YiChuang.exe' (Join-Path $packageRoot 'Source\Main') 'x86' '7.3' 'YiChuang.Program' $true
 Invoke-Rebuild 'wxocr.exe' (Join-Path $packageRoot 'Source\OCR') 'x64' '12' 'wxocr.Program' $false
-foreach($mode in @('select','F1','doubleR')){Copy-Item -LiteralPath (Join-Path $appDir ('XtransNoLogin-'+$mode+'-mode.exe')) -Destination $stageDir}
+foreach($mode in @('select','F1','doubleR')){Copy-Item -LiteralPath (Join-Path $appDir ('YiChuang-'+$mode+'-mode.exe')) -Destination $stageDir}
 & (Join-Path $packageRoot 'Build-InputHelpers.ps1') -AppDirectory $stageDir
 Assert-AppStopped
 $restoreDir=Join-Path $stageDir 'previous'

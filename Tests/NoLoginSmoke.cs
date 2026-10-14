@@ -52,21 +52,21 @@ class NoLoginSmoke
                 IsolatedData=Path.Combine(output,"isolated-data-"+Guid.NewGuid().ToString("N"));Directory.CreateDirectory(IsolatedData);
                 var proxies=(object[])assembly.GetType("_63AF42A1").GetField("_71AC5D16").GetValue(null);
                 proxies[318]=Delegate.CreateDelegate(proxies[318].GetType(),typeof(NoLoginSmoke).GetMethod("Folder"));
-                EventInfo streamEvent=assembly.GetType("Xtranslator.ChatGPT").GetEvent("MyChatGPTEvent");
+                EventInfo streamEvent=assembly.GetType("YiChuang.ChatGPT").GetEvent("MyChatGPTEvent");
                 streamEvent.AddEventHandler(null,Delegate.CreateDelegate(streamEvent.EventHandlerType,typeof(NoLoginSmoke).GetMethod("OnStream")));
-                Assert(assembly.GetType("Xtranslator.FrmLogin")==null&&assembly.GetType("Xtranslator.Form5")==null,"Login forms still compiled");
-                main=assembly.GetType("Xtranslator.ClassMain");
+                Assert(assembly.GetType("YiChuang.FrmLogin")==null&&assembly.GetType("YiChuang.Form5")==null,"Login forms still compiled");
+                main=assembly.GetType("YiChuang.ClassMain");
                 Assert(main.GetField("isLogin")==null&&main.GetField("jifenNum")==null,"Account state still compiled");
                 assembly.GetType("RebuildInfo").GetField("DiagnosticOutput",BindingFlags.Static|BindingFlags.NonPublic).SetValue(null,output);
-                assembly.GetType("Xtranslator.Program").GetField("ProgramStarted").SetValue(null,new EventWaitHandle(false,EventResetMode.AutoReset));
+                assembly.GetType("YiChuang.Program").GetField("ProgramStarted").SetValue(null,new EventWaitHandle(false,EventResetMode.AutoReset));
                 Application.SetUnhandledExceptionMode(UnhandledExceptionMode.ThrowException);Application.EnableVisualStyles();
-                form=(Form)Activator.CreateInstance(assembly.GetType("Xtranslator.Form2"));form.Opacity=0;form.Show();Application.DoEvents();
-            foreach(int engineId in new[]{4,5,6,14,16,17,18,19})assembly.GetType("Xtranslator.EngineRegistry").GetMethod("SetVisible").Invoke(null,new object[]{engineId,true});
+                form=(Form)Activator.CreateInstance(assembly.GetType("YiChuang.Form2"));form.Opacity=0;form.Show();Application.DoEvents();
+            foreach(int engineId in new[]{4,5,6,14,16,17,18,19})assembly.GetType("YiChuang.EngineRegistry").GetMethod("SetVisible").Invoke(null,new object[]{engineId,true});
             form.GetType().GetMethod("RebuildEngineMenu",BindingFlags.Instance|BindingFlags.NonPublic).Invoke(form,null);
 
                 log.Add("Main form loaded without account or login cache");
                 var source=(RichTextBox)Member(form,"rtb原文");var translated=(RichTextBox)Member(form,"rtb译文");source.Text="";
-                using(Form settings=(Form)Activator.CreateInstance(assembly.GetType("Xtranslator.Frmsetting"))) {
+                using(Form settings=(Form)Activator.CreateInstance(assembly.GetType("YiChuang.Frmsetting"))) {
                     settings.Opacity=0;settings.Show();Application.DoEvents();
                     var tree=(FlowLayoutPanel)settings.Controls.Find("SettingsNavigation",true)[0];
                     Assert(tree.Controls.Count==5,"Settings navigation missing");

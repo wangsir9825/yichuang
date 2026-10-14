@@ -11,7 +11,7 @@ class CustomLocalRealProbe
 {
     static Assembly App;static string Data,Output;static int External;const BindingFlags F=BindingFlags.Public|BindingFlags.NonPublic|BindingFlags.Static|BindingFlags.Instance;
     public static string Folder(Environment.SpecialFolder f){return Data;}
-    static Type T(string n){return App.GetType("Xtranslator."+n);}
+    static Type T(string n){return App.GetType("YiChuang."+n);}
     static object Field(object o,string n){return o.GetType().GetField(n,F).GetValue(o);}
     static object Call(object o,string n,params object[] a){return o.GetType().GetMethod(n,F).Invoke(o,a);}
     static object Reg(string n,params object[] a){return T("EngineRegistry").GetMethod(n,F).Invoke(null,a);}

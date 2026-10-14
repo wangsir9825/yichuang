@@ -25,7 +25,7 @@ class FontSettingsRegression
     class DenyNetwork : IWebRequestCreate { public WebRequest Create(Uri uri) { throw new Exception("Unexpected network request: "+uri.Host); } }
     static Form Settings(Assembly app,Form form)
     {
-        var settings=(Form)Activator.CreateInstance(app.GetType("Xtranslator.Frmsetting"));settings.Opacity=0;
+        var settings=(Form)Activator.CreateInstance(app.GetType("YiChuang.Frmsetting"));settings.Opacity=0;
         foreach(string entry in new[]{"Translation","Yuan"}) {
             var info=settings.GetType().GetEvent("Event_Set"+entry+"SizeType");
             info.AddEventHandler(settings,Delegate.CreateDelegate(info.EventHandlerType,form,form.GetType().GetMethod("F_Event_Set"+entry+"SizeType",BindingFlags.Instance|BindingFlags.NonPublic)));
@@ -40,15 +40,15 @@ class FontSettingsRegression
         try {
             string exe=Path.GetFullPath(args[0]);Directory.SetCurrentDirectory(Path.GetDirectoryName(exe));
             AppDomain.CurrentDomain.AssemblyResolve+=(s,e)=>{string p=Path.Combine(Path.GetDirectoryName(exe),new AssemblyName(e.Name).Name+".dll");return File.Exists(p)?Assembly.LoadFrom(p):null;};
-            Assembly app=Assembly.LoadFrom(exe);Type main=app.GetType("Xtranslator.ClassMain");
+            Assembly app=Assembly.LoadFrom(exe);Type main=app.GetType("YiChuang.ClassMain");
             Data=Path.Combine(output,"isolated-data");Directory.CreateDirectory(Data);
             var proxies=(object[])app.GetType("_63AF42A1").GetField("_71AC5D16").GetValue(null);
             proxies[318]=Delegate.CreateDelegate(proxies[318].GetType(),typeof(FontSettingsRegression).GetMethod("Folder"));
-            app.GetType("Xtranslator.Program").GetField("ProgramStarted").SetValue(null,new EventWaitHandle(false,EventResetMode.AutoReset));
+            app.GetType("YiChuang.Program").GetField("ProgramStarted").SetValue(null,new EventWaitHandle(false,EventResetMode.AutoReset));
             app.GetType("RebuildInfo").GetField("DiagnosticOutput",BindingFlags.NonPublic|BindingFlags.Static).SetValue(null,output);
             WebRequest.RegisterPrefix("http://",new DenyNetwork());WebRequest.RegisterPrefix("https://",new DenyNetwork());
             Application.EnableVisualStyles();
-            var form=(Form)Activator.CreateInstance(app.GetType("Xtranslator.Form2"));form.Opacity=0;form.Show();Application.DoEvents();
+            var form=(Form)Activator.CreateInstance(app.GetType("YiChuang.Form2"));form.Opacity=0;form.Show();Application.DoEvents();
             if(args.Length>2 && args[2]=="--restart-check") {
                 Assert((float)Value(main,"translationFontSize")==12f,"Fresh process did not restore saved 12pt");
                 Assert((float)Value(main,"originalFontSize")==14f,"Fresh process did not restore saved source 14pt");

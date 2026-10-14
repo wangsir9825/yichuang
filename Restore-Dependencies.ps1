@@ -3,7 +3,7 @@ $manifest=Get-Content -LiteralPath (Join-Path $PSScriptRoot 'DEPENDENCIES.json')
 $work=Join-Path $PSScriptRoot 'Build\dependencies'
 New-Item -ItemType Directory -Path $work -Force | Out-Null
 $archive=Join-Path $work 'portable.zip'
-$url='https://github.com/wangsir9825/yichuang/releases/download/v1.5.4/yichuang-v1.5.4-windows-x64-portable.zip'
+$url='https://github.com/wangsir9825/yichuang/releases/download/v1.5.5/yichuang-v1.5.5-windows-x64-portable.zip'
 if(-not(Test-Path -LiteralPath $archive)){[Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;Invoke-WebRequest -UseBasicParsing -Uri $url -OutFile $archive}
 if((Get-FileHash -LiteralPath $archive -Algorithm SHA256).Hash -ne $manifest.portable_sha256){throw 'Dependency archive SHA-256 mismatch.'}
 if(Test-Path -LiteralPath (Join-Path $PSScriptRoot 'App')){throw 'App already exists. Use a fresh checkout to avoid replacing your program.'}

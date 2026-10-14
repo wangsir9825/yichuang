@@ -1,4 +1,4 @@
-﻿#define AppVersion "1.5.4"
+﻿#define AppVersion "1.5.5"
 #define Root AddBackslash(SourcePath) + ".."
 
 [Setup]
@@ -24,7 +24,7 @@ WizardStyle=modern
 DisableProgramGroupPage=yes
 AllowNoIcons=yes
 CloseApplications=yes
-CloseApplicationsFilter=YiChuang.exe,wxocr.exe,XtransNoLogin-*.exe
+CloseApplicationsFilter=YiChuang.exe,wxocr.exe,YiChuang-*.exe
 RestartApplications=no
 Uninstallable=yes
 SetupLogging=yes

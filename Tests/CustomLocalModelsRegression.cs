@@ -9,7 +9,7 @@ class CustomLocalModelsRegression
 {
     static Assembly App;static string Data,Output;const BindingFlags F=BindingFlags.Public|BindingFlags.NonPublic|BindingFlags.Instance|BindingFlags.Static;
     public static string Folder(Environment.SpecialFolder f){return Data;}
-    static Type T(string n){return App.GetType("Xtranslator."+n);}
+    static Type T(string n){return App.GetType("YiChuang."+n);}
     static object Field(object o,string n){return o.GetType().GetField(n,F).GetValue(o);}
     static object Reg(string n,params object[] a){return T("EngineRegistry").GetMethod(n,F).Invoke(null,a);}
     static void Check(bool ok,string message){if(!ok)throw new Exception(message);}

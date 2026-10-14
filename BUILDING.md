@@ -9,6 +9,6 @@ Windows x64，.NET Framework 4.8，Visual Studio 2022 Build Tools（含 Roslyn C
 
 仓库不提交二进制依赖与构建产物。依赖哈希见 DEPENDENCIES.json；AutoHotkey 运行时来自 1.1.33.02，上游对应源码另附 Release。Build-InputHelpers.ps1 将本仓库 AHK 脚本写入原运行时资源。旧工程还使用 DSkin、Noesis 等原有 DLL，公开源码不额外授予这些第三方库的许可。
 
-本版本安装包由 1.5.4 对应源码构建，随后在独立副本复建和回归；重新编译不保证逐字节一致。不得将任意来源 DLL 替换成同名文件后声称仍为本次核验版本。
+本版本安装包由 1.5.5 对应源码构建，随后在独立副本复建和回归；重新编译不保证逐字节一致。不得将任意来源 DLL 替换成同名文件后声称仍为本次核验版本。
 
 测试时请关闭所有译窗实例；目录较深时，使用 `-EvidenceDirectory <较短的隔离目录>`，防止测试配置路径超过 Windows 传统路径限制。

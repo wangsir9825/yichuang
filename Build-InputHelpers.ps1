@@ -27,10 +27,10 @@ public static class YiChuangBuildResources {
 }
 $appRoot=[IO.Path]::GetFullPath($AppDirectory)
 foreach($mode in @('select','F1','doubleR')) {
-    $exe=[IO.Path]::GetFullPath((Join-Path $appRoot ('XtransNoLogin-'+$mode+'-mode.exe')))
+    $exe=[IO.Path]::GetFullPath((Join-Path $appRoot ('YiChuang-'+$mode+'-mode.exe')))
     if(-not $exe.StartsWith($appRoot+[IO.Path]::DirectorySeparatorChar,[StringComparison]::OrdinalIgnoreCase)){throw 'Helper path escaped App'}
     if(-not (Test-Path -LiteralPath $exe)){throw ('Existing helper runtime missing: '+$exe)}
-    $source=Join-Path $PSScriptRoot ('Source/Scripts/Xtranslator-'+$mode+'-mode.ahk')
+    $source=Join-Path $PSScriptRoot ('Source/Scripts/YiChuang-'+$mode+'-mode.ahk')
     $text=[IO.File]::ReadAllText($source)
     if($text -match '(?m)^![1-6]::|WinMove|SysGet'){throw 'Removed window-position hotkeys remain in source'}
     $bytes=[Text.Encoding]::UTF8.GetBytes([char]0xfeff+$text)

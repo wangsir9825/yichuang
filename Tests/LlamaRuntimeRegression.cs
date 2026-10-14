@@ -16,7 +16,7 @@ class LlamaRuntimeRegression
     static Assembly App;static string Data;static List<string> Log=new List<string>();
     const BindingFlags F=BindingFlags.Static|BindingFlags.Instance|BindingFlags.Public|BindingFlags.NonPublic;
     public static string Folder(Environment.SpecialFolder f){return Data;}
-    static Type T(string name){return App.GetType("Xtranslator."+name);}
+    static Type T(string name){return App.GetType("YiChuang."+name);}
     static object New(string type){return Activator.CreateInstance(T(type),true);}
     static object Call(string type,string name,params object[] values){try{return T(type).GetMethod(name,F).Invoke(null,values);}catch(TargetInvocationException ex){throw ex.InnerException;}}
     static void Set(object instance,string name,object value){instance.GetType().GetField(name,F).SetValue(instance,value);}

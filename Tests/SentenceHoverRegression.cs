@@ -38,8 +38,8 @@ class SentenceHoverRegression
         {
             string exe=Path.GetFullPath(args[0]);Directory.SetCurrentDirectory(Path.GetDirectoryName(exe));
             AppDomain.CurrentDomain.AssemblyResolve+=(s,e)=>{string f=Path.Combine(Path.GetDirectoryName(exe),new AssemblyName(e.Name).Name+".dll");return File.Exists(f)?Assembly.LoadFrom(f):null;};
-            var app=Assembly.LoadFrom(exe);var alignment=app.GetType("Xtranslator.SentenceAlignment");
-            var controllerType=app.GetType("Xtranslator.SentenceHoverController");var viewType=app.GetType("Xtranslator.HoverRichTextBox");
+            var app=Assembly.LoadFrom(exe);var alignment=app.GetType("YiChuang.SentenceAlignment");
+            var controllerType=app.GetType("YiChuang.SentenceHoverController");var viewType=app.GetType("YiChuang.HoverRichTextBox");
             Func<string,IList> split=s=>(IList)alignment.GetMethod("Split").Invoke(null,new object[]{s});
             string en="Dr. Smith measured 3.14 units, e.g. in Fig. 2. The result is stable! Is it useful?";
             var parts=split(en);Assert(parts.Count==3,"Abbreviation/decimal split incorrect");
@@ -99,10 +99,10 @@ class SentenceHoverRegression
             Data=Path.Combine(output,"isolated-data-"+Guid.NewGuid().ToString("N"));Directory.CreateDirectory(Data);
             var proxies=(object[])app.GetType("_63AF42A1").GetField("_71AC5D16").GetValue(null);
             proxies[318]=Delegate.CreateDelegate(proxies[318].GetType(),typeof(SentenceHoverRegression).GetMethod("Folder"));
-            app.GetType("Xtranslator.Program").GetField("ProgramStarted").SetValue(null,new EventWaitHandle(false,EventResetMode.AutoReset));
+            app.GetType("YiChuang.Program").GetField("ProgramStarted").SetValue(null,new EventWaitHandle(false,EventResetMode.AutoReset));
             app.GetType("RebuildInfo").GetField("DiagnosticOutput",BindingFlags.Static|BindingFlags.NonPublic).SetValue(null,output);
             WebRequest.RegisterPrefix("http://",new Guard());WebRequest.RegisterPrefix("https://",new Guard());
-            using(var main=(Form)Activator.CreateInstance(app.GetType("Xtranslator.Form2")))
+            using(var main=(Form)Activator.CreateInstance(app.GetType("YiChuang.Form2")))
             {
                 main.Opacity=0;main.Show();Application.DoEvents();
                 main.GetType().GetField("_isInitializing",Private).SetValue(main,true);

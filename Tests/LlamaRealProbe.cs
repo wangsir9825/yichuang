@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Collections.Generic;
 using System.Drawing;
@@ -18,29 +18,33 @@ class LlamaRealProbe
     public static string Folder(Environment.SpecialFolder f){return Data;}
     static object Field(object o,string n){return o.GetType().GetField(n,Private).GetValue(o);}
     static object Call(object o,string n,params object[] values){return o.GetType().GetMethod(n,Private).Invoke(o,values);}
-    class Guard:IWebRequestCreate{public WebRequest Create(Uri uri){if(uri.Scheme!="http"||uri.Host!="127.0.0.1"){Unexpected++;throw new Exception("External requests are disabled in this test");}return WebRequest.CreateDefault(uri);}}
+    class Guard:IWebRequestCreate{public WebRequest Create(Uri uri){if(uri.Scheme!="http"||uri.Host!="127.0.0.1"||uri.AbsolutePath=="/api/pull"){Unexpected++;throw new Exception("External requests and weight downloads are disabled in this test");}return WebRequest.CreateDefault(uri);}}
     [STAThread]static int Main(string[] args)
     {
         Output=Path.GetFullPath(args[1]);Directory.CreateDirectory(Output);
         using(var watchdog=new System.Threading.Timer(s=>Environment.Exit(124),null,600000,Timeout.Infinite))try{
             string exe=Path.GetFullPath(args[0]);Directory.SetCurrentDirectory(Path.GetDirectoryName(exe));
             AppDomain.CurrentDomain.AssemblyResolve+=(s,e)=>{string f=Path.Combine(Path.GetDirectoryName(exe),new AssemblyName(e.Name).Name+".dll");return File.Exists(f)?Assembly.LoadFrom(f):null;};
-            var app=Assembly.LoadFrom(exe);var registry=app.GetType("Xtranslator.EngineRegistry");var def=app.GetType("Xtranslator.EngineDefinition");
+            var app=Assembly.LoadFrom(exe);var registry=app.GetType("YiChuang.EngineRegistry");var def=app.GetType("YiChuang.EngineDefinition");
             Data=Path.Combine(Output,"isolated-data-"+Guid.NewGuid().ToString("N"));Directory.CreateDirectory(Data);
             var proxies=(object[])app.GetType("_63AF42A1").GetField("_71AC5D16").GetValue(null);proxies[318]=Delegate.CreateDelegate(proxies[318].GetType(),typeof(LlamaRealProbe).GetMethod("Folder"));
-            app.GetType("Xtranslator.Program").GetField("ProgramStarted").SetValue(null,new EventWaitHandle(false,EventResetMode.AutoReset));app.GetType("RebuildInfo").GetField("DiagnosticOutput",BindingFlags.Static|BindingFlags.NonPublic).SetValue(null,Output);
-            var runtime=app.GetType("Xtranslator.LocalRuntime");var opts=Activator.CreateInstance(app.GetType("Xtranslator.LocalRuntimeOptions"),true);
+            app.GetType("YiChuang.Program").GetField("ProgramStarted").SetValue(null,new EventWaitHandle(false,EventResetMode.AutoReset));app.GetType("RebuildInfo").GetField("DiagnosticOutput",BindingFlags.Static|BindingFlags.NonPublic).SetValue(null,Output);
+            var runtime=app.GetType("YiChuang.LocalRuntime");var opts=Activator.CreateInstance(app.GetType("YiChuang.LocalRuntimeOptions"),true);
             var all=BindingFlags.Static|BindingFlags.Instance|BindingFlags.Public|BindingFlags.NonPublic;
             opts.GetType().GetField("ModelsDirectory").SetValue(opts,Path.GetFullPath(args[2]));opts.GetType().GetField("GgufDirectory").SetValue(opts,Path.GetFullPath(args[3]));
             Action<string> progress=value=>{};
-            foreach(bool hy in new[]{true,false}){string path=(string)app.GetType("Xtranslator.GgufModels").GetMethod("Prepare",all).Invoke(null,new object[]{opts,hy,progress,CancellationToken.None});opts.GetType().GetField(hy?"HyGguf":"GemmaGguf").SetValue(opts,path);}
+            foreach(bool hy in new[]{true,false}){string path=(string)app.GetType("YiChuang.GgufModels").GetMethod("Prepare",all).Invoke(null,new object[]{opts,hy,progress,CancellationToken.None});opts.GetType().GetField(hy?"HyGguf":"GemmaGguf").SetValue(opts,path);}
             runtime.GetMethod("Save",all).Invoke(null,new[]{opts});
-            var llama=app.GetType("Xtranslator.LlamaRuntime");var settings=app.GetType("Xtranslator.LocalModelSettings");
+            var llama=app.GetType("YiChuang.LlamaRuntime");var settings=app.GetType("YiChuang.LocalModelSettings");
             WebRequest.RegisterPrefix("http://",new Guard());WebRequest.RegisterPrefix("https://",new Guard());Application.EnableVisualStyles();
-            using(var main=(Form)Activator.CreateInstance(app.GetType("Xtranslator.Form2"))){
+            string[] installed=(string[])runtime.GetMethod("Models",all).Invoke(null,new object[]{"http://127.0.0.1:11434",CancellationToken.None});
+            if(!installed.Any(name=>name.EndsWith("-hy-mt2:7b-q6",StringComparison.OrdinalIgnoreCase)))throw new Exception("Cached Hy model required; no download allowed.");
+            runtime.GetMethod("PrepareModels",all).Invoke(null,new object[]{"http://127.0.0.1:11434",true,false,progress,CancellationToken.None});
+            Log.Add("Current Hy alias prepared from already cached model; no weight pull.");
+            using(var main=(Form)Activator.CreateInstance(app.GetType("YiChuang.Form2"))){
                 main.Show();Application.DoEvents();Call(main,"SetCaptureMode",0,false);var source=(RichTextBox)Field(main,"rtb原文");var translated=(RichTextBox)Field(main,"rtb译文");var cancel=(ToolStripButton)Field(main,"localCancelButton");
-                foreach(string model in new[]{"xtranslator-hy-mt2:7b-q6","translategemma:12b"}){
-                    int id=model.StartsWith("xtranslator")?16:17;registry.GetMethod("SetVisible").Invoke(null,new object[]{id,true});source.Clear();Call(main,"RebuildEngineMenu");Call(main,"SelectManagedEngine",id);
+                foreach(string model in new[]{"yichuang-hy-mt2:7b-q6","translategemma:12b"}){
+                    int id=model.StartsWith("yichuang",StringComparison.OrdinalIgnoreCase)?16:17;registry.GetMethod("SetVisible").Invoke(null,new object[]{id,true});source.Clear();Call(main,"RebuildEngineMenu");Call(main,"SelectManagedEngine",id);
                     string[] samples={"The new settings let users choose their own translation model.","用户可以在设置中添加或移除翻译引擎。","architecture","Bonjour, cette maison est très lumineuse.","Bonjour, cette maison est très lumineuse.","这座房子的窗户很大。"};
                     string[] modes={"auto","auto","auto","to-en","to-zh","to-zh"};
                     for(int index=0;index<samples.Length;index++){
@@ -49,8 +53,8 @@ class LlamaRealProbe
                         string result=translated.Text;if(cancel.Enabled||string.IsNullOrWhiteSpace(result)||result.StartsWith("翻译失败")||result.Contains("正在"))throw new Exception(model+" failed: "+result);
                         bool chinese=Regex.IsMatch(result,"[\u4e00-\u9fff]");if(index==1||index==3?chinese:!chinese)throw new Exception("Unexpected translation direction: "+result);
                         Log.Add(model+" | "+modes[index]+" | "+text+" => "+result);File.WriteAllLines(Path.Combine(Output,"real-local-results.txt"),Log);
-                        using(var bitmap=new Bitmap(main.Width,main.Height)){main.DrawToBitmap(bitmap,new Rectangle(Point.Empty,main.Size));bitmap.Save(Path.Combine(Output,(model.StartsWith("xtranslator")?"hy":"gemma")+"-"+index+".png"));}
-                        using(var wc=new WebClient()){wc.Proxy=null;File.WriteAllText(Path.Combine(Output,"loaded-after-"+(model.StartsWith("xtranslator")?"hy":"gemma")+"-"+index+".json"),wc.DownloadString("http://127.0.0.1:11434/api/ps"));}
+                        using(var bitmap=new Bitmap(main.Width,main.Height)){main.DrawToBitmap(bitmap,new Rectangle(Point.Empty,main.Size));bitmap.Save(Path.Combine(Output,(model.StartsWith("yichuang",StringComparison.OrdinalIgnoreCase)?"hy":"gemma")+"-"+index+".png"));}
+                        using(var wc=new WebClient()){wc.Proxy=null;File.WriteAllText(Path.Combine(Output,"loaded-after-"+(model.StartsWith("yichuang",StringComparison.OrdinalIgnoreCase)?"hy":"gemma")+"-"+index+".json"),wc.DownloadString("http://127.0.0.1:11434/api/ps"));}
                         int pid=(int)llama.GetProperty("ProcessId",all).GetValue(null,null);if(pid==0)throw new Exception("llama.cpp did not run");
                         Log.Add("Active llama.cpp PID="+pid+" path="+llama.GetProperty("LoadedModel",all).GetValue(null,null));
                         using(var proc=System.Diagnostics.Process.GetProcessById(pid)){if(proc.ProcessName!="llama-server")throw new Exception("Unexpected runtime process");}

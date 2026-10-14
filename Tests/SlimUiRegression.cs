@@ -22,21 +22,21 @@ class SlimUiRegression
             var app=Assembly.LoadFrom(exe);Data=Path.Combine(output,"isolated-data-"+Guid.NewGuid().ToString("N"));Directory.CreateDirectory(Data);
             var proxies=(object[])app.GetType("_63AF42A1").GetField("_71AC5D16").GetValue(null);
             proxies[318]=Delegate.CreateDelegate(proxies[318].GetType(),typeof(SlimUiRegression).GetMethod("Folder"));
-            app.GetType("Xtranslator.Program").GetField("ProgramStarted").SetValue(null,new EventWaitHandle(false,EventResetMode.AutoReset));
+            app.GetType("YiChuang.Program").GetField("ProgramStarted").SetValue(null,new EventWaitHandle(false,EventResetMode.AutoReset));
             app.GetType("RebuildInfo").GetField("DiagnosticOutput",BindingFlags.Static|BindingFlags.NonPublic).SetValue(null,output);
             WebRequest.RegisterPrefix("http://",new Guard());WebRequest.RegisterPrefix("https://",new Guard());
-            Application.EnableVisualStyles();var config=app.GetType("Xtranslator.ClassMain");
+            Application.EnableVisualStyles();var config=app.GetType("YiChuang.ClassMain");
             config.GetField("is单词悬浮框").SetValue(null,true);config.GetField("formLocation").SetValue(null,"4");
-            using(var main=(Form)Activator.CreateInstance(app.GetType("Xtranslator.Form2"))) {
+            using(var main=(Form)Activator.CreateInstance(app.GetType("YiChuang.Form2"))) {
                 main.Opacity=0;main.Show();Application.DoEvents();
-                Assert(main.Text=="译窗 1.5.4","Product title not updated");
-                Assert(System.Diagnostics.FileVersionInfo.GetVersionInfo(exe).FileVersion=="1.5.4.0","Version not updated");
-                foreach(string name in new[]{"Xtranslator.LocalComparisonForm","Xtranslator.Frm悬浮","Xtranslator.Form1","Xtranslator.Form3","Xtranslator.UserControl百度API"})Assert(app.GetType(name)==null,"Removed type remains compiled: "+name);
+                Assert(main.Text=="译窗 1.5.5","Product title not updated");
+                Assert(System.Diagnostics.FileVersionInfo.GetVersionInfo(exe).FileVersion=="1.5.5.0","Version not updated");
+                foreach(string name in new[]{"YiChuang.LocalComparisonForm","YiChuang.Frm悬浮","YiChuang.Form1","YiChuang.Form3","YiChuang.UserControl百度API"})Assert(app.GetType(name)==null,"Removed type remains compiled: "+name);
                 foreach(string field in new[]{"tbtnhide","tbtnclockwise","tbtnanticlockwise","tbtnInput_trans_mode"})Assert(main.GetType().GetField(field,Private)==null,"Removed button remains compiled: "+field);
                 var menu=(ToolStripDropDownButton)Member(main,"toolStripDropDownButton1");int count=0;
                 foreach(ToolStripItem item in menu.DropDownItems)if(item is ToolStripMenuItem){count++;Assert(item.Text.StartsWith(count+"："),"Engine numbering changed or comparison remains");}
                 Assert(count==4,"Default visible engines should be the requested four");
-                app.GetType("Xtranslator.EngineRegistry").GetMethod("SetVisible").Invoke(null,new object[]{16,true});
+                app.GetType("YiChuang.EngineRegistry").GetMethod("SetVisible").Invoke(null,new object[]{16,true});
                 Assert(!(bool)config.GetField("is单词悬浮框").GetValue(null)&&config.GetField("formLocation").GetValue(null).ToString()=="1","Old floating/layout setting not normalized");
                 main.GetType().GetField("_isInitializing",Private).SetValue(main,true);
                 main.GetType().GetMethod("SelectLocalEngine",Private).Invoke(main,new object[]{16});
@@ -48,7 +48,7 @@ class SlimUiRegression
                 var message=Message.Create(main.Handle,0x312,new IntPtr(100),IntPtr.Zero);proc.Invoke(main,new object[]{message});Application.DoEvents();
                 Assert(main.WindowState==FormWindowState.Minimized,"F6 no longer minimizes");
                 proc.Invoke(main,new object[]{message});Application.DoEvents();Assert(main.WindowState==FormWindowState.Normal,"F6 no longer restores");
-                using(var settings=(Form)Activator.CreateInstance(app.GetType("Xtranslator.Frmsetting"))) {
+                using(var settings=(Form)Activator.CreateInstance(app.GetType("YiChuang.Frmsetting"))) {
                     settings.Opacity=0;settings.Show(main);Application.DoEvents();Assert(settings.Text=="译窗设置","Settings title not updated");
                     settings.GetType().GetMethod("ShowPage").Invoke(settings,new object[]{"常用设置"});Application.DoEvents();
                     Assert(settings.Controls.Find("rdb单词翻译跟随鼠标悬浮显示",true).Length==0,"Floating display option remains");

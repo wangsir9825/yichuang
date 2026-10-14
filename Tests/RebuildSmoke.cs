@@ -17,7 +17,7 @@ class RebuildSmoke
             object[] proxies=(object[])a.GetType("_63AF42A1").GetField("_71AC5D16").GetValue(null);
             int count=0;foreach(object proxy in proxies)if(proxy is Delegate)count++;
             log.Add("Proxy count="+count);
-            a.GetType("Xtranslator.Program").GetField("ProgramStarted").SetValue(null,new System.Threading.EventWaitHandle(false,System.Threading.EventResetMode.AutoReset));
+            a.GetType("YiChuang.Program").GetField("ProgramStarted").SetValue(null,new System.Threading.EventWaitHandle(false,System.Threading.EventResetMode.AutoReset));
             Application.EnableVisualStyles();
             foreach(Type t in a.GetTypes()) {
                 if(!typeof(UserControl).IsAssignableFrom(t)||t.IsAbstract||t.GetConstructor(Type.EmptyTypes)==null)continue;
@@ -27,7 +27,7 @@ class RebuildSmoke
             }
             // Create the main form without displaying it or triggering its Load handler.
             try {
-                using(Form form=(Form)Activator.CreateInstance(a.GetType("Xtranslator.Form2"))) {
+                using(Form form=(Form)Activator.CreateInstance(a.GetType("YiChuang.Form2"))) {
                     log.Add("Main form OK: controls="+form.Controls.Count+" size="+form.Size);
                     File.WriteAllLines(Path.Combine(output,"smoke.log"),log.ToArray());
                     if(Path.GetFileName(Path.GetDirectoryName(output))=="AnalysisRun") {

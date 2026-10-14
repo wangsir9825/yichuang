@@ -14,7 +14,7 @@ internal static class RebuildInfo
     internal static void Log(Exception ex) {
         Stage(ex.ToString());
         try {
-            string dir=Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),"Xtranslator-NoLogin-2.9.18B","logs");
+            string dir=Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),"YiChuang","logs");
             Directory.CreateDirectory(dir);File.AppendAllText(Path.Combine(dir,"rebuild-errors.log"),DateTime.Now.ToString("o")+" "+ex+Environment.NewLine);
         }catch{}
     }
@@ -33,7 +33,7 @@ internal static class RebuildInfo
             try {
                 Stage("Main title="+form.Text+" visible="+form.Visible+" controls="+form.Controls.Count);
                 foreach(Form open in Application.OpenForms)Stage("Open form="+open.GetType().FullName+" title="+open.Text);
-                using(Form settings=new Xtranslator.Frmsetting()) {
+                using(Form settings=new YiChuang.Frmsetting()) {
                     settings.Opacity=0;settings.Show();Application.DoEvents();
                     using(var bitmap=new System.Drawing.Bitmap(settings.Width,settings.Height)) {
                         settings.DrawToBitmap(bitmap,new System.Drawing.Rectangle(0,0,bitmap.Width,bitmap.Height));

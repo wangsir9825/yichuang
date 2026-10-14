@@ -24,14 +24,14 @@ class MouseCaptureRegression
     static void Check(bool ok, string message) { if (!ok) throw new Exception(message); }
     static object Call(object obj, string name, params object[] args) { return obj.GetType().GetMethod(name, Hidden).Invoke(obj, args); }
     static object Field(object obj, string name) { return obj.GetType().GetField(name, Hidden).GetValue(obj); }
-    static object Gate() { return Activator.CreateInstance(App.GetType("Xtranslator.MouseSelectionGate"), true); }
+    static object Gate() { return Activator.CreateInstance(App.GetType("YiChuang.MouseSelectionGate"), true); }
     static void Press(object gate, IntPtr window, int x, int y, long time, bool allowed = true) { Call(gate, "Down", new Point(x, y), window, time, allowed); }
     static object Release(object gate, IntPtr window, int x, int y, long time, bool allowed = true) { return Call(gate, "Up", new Point(x, y), window, time, allowed, 500, new Size(8, 8)); }
     static bool Current(object gate, object ticket, IntPtr window, long time, bool allowed = true) { return (bool)Call(gate, "IsCurrent", ticket, window, time, allowed); }
     static object Drag(object gate, IntPtr window, long time = 0) { Press(gate, window, 100, 100, time); return Release(gate, window, 180, 100, time + 100); }
     static void HookCoordinates()
     {
-        var hook = Activator.CreateInstance(App.GetType("Xtranslator.MouseHook"), true);
+        var hook = Activator.CreateInstance(App.GetType("YiChuang.MouseHook"), true);
         foreach (string name in new[] { "Down", "Up" })
         {
             var evt = hook.GetType().GetEvent("Mouse" + name + "Event");
@@ -82,7 +82,7 @@ class MouseCaptureRegression
     }
     static void CopyCases(Form main)
     {
-        var run = App.GetType("Xtranslator.MouseSelectionCopy").GetMethod("RunAsync", BindingFlags.Static | BindingFlags.NonPublic);
+        var run = App.GetType("YiChuang.MouseSelectionCopy").GetMethod("RunAsync", BindingFlags.Static | BindingFlags.NonPublic);
         var source = (RichTextBox)Field(main, "rtb原文");
         foreach (string scenario in new[] { "normal", "same-text-new-copy", "before-copy-switch", "after-copy-switch", "away-back", "modifier", "no-new-clipboard", "clipboard-race", "publish-race", "clipboard-busy" })
         {
@@ -131,10 +131,10 @@ class MouseCaptureRegression
             Data = Path.Combine(output, "isolated-data-" + Guid.NewGuid().ToString("N")); Directory.CreateDirectory(Data);
             var proxies = (object[])App.GetType("_63AF42A1").GetField("_71AC5D16").GetValue(null);
             proxies[318] = Delegate.CreateDelegate(proxies[318].GetType(), typeof(MouseCaptureRegression).GetMethod("Folder"));
-            App.GetType("Xtranslator.Program").GetField("ProgramStarted").SetValue(null, new EventWaitHandle(false, EventResetMode.AutoReset));
+            App.GetType("YiChuang.Program").GetField("ProgramStarted").SetValue(null, new EventWaitHandle(false, EventResetMode.AutoReset));
             App.GetType("RebuildInfo").GetField("DiagnosticOutput", BindingFlags.Static | BindingFlags.NonPublic).SetValue(null, output);
             WebRequest.RegisterPrefix("http://", new NetworkGuard()); WebRequest.RegisterPrefix("https://", new NetworkGuard()); Application.EnableVisualStyles();
-            using (var main = (Form)Activator.CreateInstance(App.GetType("Xtranslator.Form2")))
+            using (var main = (Form)Activator.CreateInstance(App.GetType("YiChuang.Form2")))
             {
                 main.Opacity = 0; main.Show(); Application.DoEvents(); main.GetType().GetField("_isInitializing", Hidden).SetValue(main, true);
                 Check((IntPtr)Field(main, "captureForegroundHook") != IntPtr.Zero, "Foreground event hook failed to install");

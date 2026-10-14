@@ -38,7 +38,7 @@ class FontPersistenceRegression
         {
             timer.Tick+=(s,e)=>{
                 Form settings=null;
-                foreach(Form open in Application.OpenForms) if(open.GetType().FullName=="Xtranslator.Frmsetting") {settings=open;break;}
+                foreach(Form open in Application.OpenForms) if(open.GetType().FullName=="YiChuang.Frmsetting") {settings=open;break;}
                 if(settings==null)return;
                 timer.Stop();handled=true;
                 Stage("Modal found; checking controls");
@@ -63,7 +63,7 @@ class FontPersistenceRegression
     }
     static Form MainForm()
     {
-        var main=(Form)Activator.CreateInstance(App.GetType("Xtranslator.Form2"));
+        var main=(Form)Activator.CreateInstance(App.GetType("YiChuang.Form2"));
         main.Opacity=0;main.Show();Application.DoEvents();return main;
     }
     [STAThread]
@@ -75,12 +75,12 @@ class FontPersistenceRegression
         {
             string exe=Path.GetFullPath(args[0]);Directory.SetCurrentDirectory(Path.GetDirectoryName(exe));
             AppDomain.CurrentDomain.AssemblyResolve+=(s,e)=>{string p=Path.Combine(Path.GetDirectoryName(exe),new AssemblyName(e.Name).Name+".dll");return File.Exists(p)?Assembly.LoadFrom(p):null;};
-            App=Assembly.LoadFrom(exe);MainType=App.GetType("Xtranslator.ClassMain");
+            App=Assembly.LoadFrom(exe);MainType=App.GetType("YiChuang.ClassMain");
             bool probe=args.Length>3&&args[2]=="--read";
             Data=probe ? Path.GetFullPath(args[3]) : Path.Combine(Output,"isolated-data-"+Guid.NewGuid().ToString("N"));Directory.CreateDirectory(Data);
             var proxies=(object[])App.GetType("_63AF42A1").GetField("_71AC5D16").GetValue(null);
             proxies[318]=Delegate.CreateDelegate(proxies[318].GetType(),typeof(FontPersistenceRegression).GetMethod("Folder"));
-            App.GetType("Xtranslator.Program").GetField("ProgramStarted").SetValue(null,new EventWaitHandle(false,EventResetMode.AutoReset));
+            App.GetType("YiChuang.Program").GetField("ProgramStarted").SetValue(null,new EventWaitHandle(false,EventResetMode.AutoReset));
             App.GetType("RebuildInfo").GetField("DiagnosticOutput",BindingFlags.Static|BindingFlags.NonPublic).SetValue(null,Output);
             WebRequest.RegisterPrefix("http://",new Guard());WebRequest.RegisterPrefix("https://",new Guard());
             Application.EnableVisualStyles();
