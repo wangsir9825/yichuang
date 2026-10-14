@@ -1,0 +1,25 @@
+译窗 1.5.0 内置本地运行组件
+
+llama.cpp: ggml-org 官方 Windows x64 Vulkan b11429；MIT 许可。
+https://github.com/ggml-org/llama.cpp/releases/tag/b11429
+原始 ZIP SHA256: 1bfe78ad9168b79fa02bf67f6af9f5e17a966d824d77238517f7bef12ac73b36
+仅复制 llama-server 与所需 DLL、CPU 后端、Vulkan 后端及许可证。
+LLVM OpenMP 许可证位于 App/llama/LICENSE-LLVM-OpenMP。
+构建：Build-LlamaRuntime.ps1；固定发行版本及摘要，绝不随构建下载模型。
+
+Google 旧版 Ollama GGUF 兼容逻辑参照：
+https://github.com/ollama/ollama/blob/main/compatmigrate/gemma3.go
+https://github.com/ggml-org/llama.cpp/blob/b11429/src/models/gemma3.cpp
+只转换内置目录清单中 SHA256 已确认的旧权重，C# 流式提取文字张量并补齐 Gemma 3 参数；不需要 Python。
+不改变张量值，不修改/删除原 Ollama 权重。生成独立副本与校验收据。
+源码中的 LegacyGemmaConverter 独立实现 GGUF 读写；以上官方规则作为兼容参数依据。
+
+模型下载与运行均由译窗管理，默认不需要安装 Ollama。
+下载源使用固定 Ollama 模型仓库 blob（不需要 Ollama 软件），校验大小、GGUF 格式和 SHA256。
+腾讯约6.2 GB。Google原始约8.1 GB，文字兼容副本约7.3 GB；保留原始文件，首次准备Google需约16 GB可用磁盘空间。
+模型不随安装包分发，模型许可入口放在配置向导中。仅下载勾选项。
+自定义 GGUF 使用 llama.cpp 自带聊天模板兼容性；多文件分片与视觉输入未作为本版本受支持流程验收。
+
+运行边界：仅127.0.0.1随机端口，每个子进程临时密钥；禁用网页界面和推理日志；清除继承的LLAMA_*参数。
+一款模型一个进程，切换/取消/退出释放进程，闲置五分钟释放；Windows Job Object 确保宿主异常终止时子进程被回收。
+Vulkan使用现有显卡驱动，无需安装CUDA工具包；可改CPU模式。驱动与硬件兼容仍需外机验收。

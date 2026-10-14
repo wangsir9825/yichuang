@@ -1,0 +1,10 @@
+App/
+Build/
+Evidence/
+Packages/
+Models/
+Backups/
+*.user
+.env*
+Tests/*.exe
+Tests/*.pdb

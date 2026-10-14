@@ -1,0 +1,380 @@
+{
+  "portable_sha256": "df99a92a36d48a0339e7aee1a37157cf50882eb2b2ca645d96a9f7e46413341d",
+  "files": [
+    {
+      "path": "App/18740f44-a3b3-4ec2-8935-f8b1ad8a83c7_YiChuang.exe",
+      "size": 1458688,
+      "sha256": "b9c1ede19b71df4b33ca9a20702bfde82d90f29e707a475c249c306cbf0c45c8"
+    },
+    {
+      "path": "App/atl100.dll",
+      "size": 138056,
+      "sha256": "74b7c86b75cfaf5121554bd8cc4dd8e496458311070fa43b9b4fb13b4d8c8eab"
+    },
+    {
+      "path": "App/AxInterop.WMPLib.dll",
+      "size": 53760,
+      "sha256": "a02ef2cb0afc6f1f44bd0fa4338c6676d8c594f82e78302ccf60258efc7a5a76"
+    },
+    {
+      "path": "App/DSkin.dll",
+      "size": 5339332,
+      "sha256": "5facaf8c6295639d5df81bf9c3d7088804c11fdd3c74428f0f1392a3c11779c3"
+    },
+    {
+      "path": "App/f1c2d79a-3b45-47e8-891b-1e8f531c26c5_YiChuang.exe",
+      "size": 1464832,
+      "sha256": "1d38d86c8f500e3eeb750413fc4e9a47ef80da6404fabbc0ee8184ac938e8108"
+    },
+    {
+      "path": "App/Interop.WMPLib.dll",
+      "size": 330752,
+      "sha256": "9283b73b7257b0ee1a729012ba61c91afad398fb2383f76c761b32ec91ddbe0e"
+    },
+    {
+      "path": "App/Licenses/AutoHotkey-1.1.33.02-license.txt",
+      "size": 17769,
+      "sha256": "2f37ec8a6e912402a7d79ea03e5e33eacf54d1bf1fc7e3b0eab3a69bd8b23252"
+    },
+    {
+      "path": "App/Licenses/InteropDotNet-MIT.txt",
+      "size": 1079,
+      "sha256": "8fb016cd2a9efaa281ecce3075f69d20ffa8314ba8ecf8586d6744dd346cea25"
+    },
+    {
+      "path": "App/Licenses/Leptonica-BSD.txt",
+      "size": 1521,
+      "sha256": "87829abb5bbb00b55a107365da89e9a33f86c4250169e5a1e5588505be7d5806"
+    },
+    {
+      "path": "App/Licenses/Newtonsoft.Json-13.0.1-MIT.txt",
+      "size": 1084,
+      "sha256": "d7f83bbea3264a8e23d7739e44d9db1a4994b357274df6f00876eb2e623827ad"
+    },
+    {
+      "path": "App/Licenses/tessdata-APACHE-2.0.txt",
+      "size": 11358,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+      "path": "App/Licenses/Tesseract-APACHE-2.0.txt",
+      "size": 11358,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+      "path": "App/Licenses/Tesseract-wrapper-APACHE-2.0.txt",
+      "size": 11358,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+      "path": "App/Licenses/THIRD-PARTY-NOTICES.txt",
+      "size": 1167,
+      "sha256": "33f80249b2aed1da07c8926565e4265e9ab834547b10d4ad912b166e063edea4"
+    },
+    {
+      "path": "App/llama/ggml-base.dll",
+      "size": 803328,
+      "sha256": "19b7666b4cd7dc01e219e247783ffd1979694d6f1635bbf3209ae5fa0fc169c0"
+    },
+    {
+      "path": "App/llama/ggml-cpu-alderlake.dll",
+      "size": 1434624,
+      "sha256": "176045703530b923eb565052d9c622e1453c7013ac11823926f89260768cdddd"
+    },
+    {
+      "path": "App/llama/ggml-cpu-cannonlake.dll",
+      "size": 1614336,
+      "sha256": "c9723eab21d1d80e38f3791088739c56a8a36f7db5ad2340811eac2d3fd45af7"
+    },
+    {
+      "path": "App/llama/ggml-cpu-cascadelake.dll",
+      "size": 1598976,
+      "sha256": "1db7a13737763d444c278ac218ad9dc5dc850e1fcd98bc07ece307ae6f64dda6"
+    },
+    {
+      "path": "App/llama/ggml-cpu-cooperlake.dll",
+      "size": 1608704,
+      "sha256": "482a40664f87b8e94bdab53c13b14fa6b722ffd743a7a7c4fa7d5cec6ed44852"
+    },
+    {
+      "path": "App/llama/ggml-cpu-haswell.dll",
+      "size": 1439232,
+      "sha256": "8022a1d17a56f537b956683a484dc1a0f95ab4b01e95b4c57d53bb1e6c3e529f"
+    },
+    {
+      "path": "App/llama/ggml-cpu-icelake.dll",
+      "size": 1606144,
+      "sha256": "c096a02ec4a9fecca14a14bd9ed5d6c9fa7569cc2a678b08dd1978646abe1e2a"
+    },
+    {
+      "path": "App/llama/ggml-cpu-ivybridge.dll",
+      "size": 1314816,
+      "sha256": "1792967edf602b0a459cbb519e71a3037fba5854ba273b8328467c9d9dc201f1"
+    },
+    {
+      "path": "App/llama/ggml-cpu-piledriver.dll",
+      "size": 1307648,
+      "sha256": "b47a82e5d9087f03a54a840e848e4f2e0b44312309065e60b8d0cd421202233c"
+    },
+    {
+      "path": "App/llama/ggml-cpu-sandybridge.dll",
+      "size": 1289728,
+      "sha256": "007dc9fca693bf1e3941c1d46bb273de587c2d0947625884ccd68154d190e03c"
+    },
+    {
+      "path": "App/llama/ggml-cpu-sapphirerapids.dll",
+      "size": 1885696,
+      "sha256": "72b1203f01d4aa12f22d45415d91dc046f15e3eb3da49f7110b59c888bee9978"
+    },
+    {
+      "path": "App/llama/ggml-cpu-skylakex.dll",
+      "size": 1608192,
+      "sha256": "ccf578111e9688c2c51f0279ab4e56351fa084f7d6e43e7c091d961fdbb03081"
+    },
+    {
+      "path": "App/llama/ggml-cpu-sse42.dll",
+      "size": 915456,
+      "sha256": "740d3e84289733501b70274904c9d1135bdc579babf7c82825f5ae0133e5afbd"
+    },
+    {
+      "path": "App/llama/ggml-cpu-x64.dll",
+      "size": 908288,
+      "sha256": "b1089f3ad0cc1363519c3583b033648cf471297bdd5482e72c71dcf5c5cb0765"
+    },
+    {
+      "path": "App/llama/ggml-cpu-zen4.dll",
+      "size": 1615360,
+      "sha256": "7f257519148e3b81fc718acad0f7afcd381d2b429fe0032a1f97e365d7ff2db5"
+    },
+    {
+      "path": "App/llama/ggml-rpc.dll",
+      "size": 168960,
+      "sha256": "7ba393c88878711014e57bfe77a45ec99bbcc106f945baec1c90614370dd9459"
+    },
+    {
+      "path": "App/llama/ggml-vulkan.dll",
+      "size": 45305344,
+      "sha256": "a5d8b5b0f48d6aa240551c53ba8d7ea43516066d30e23ece6e5152731925b502"
+    },
+    {
+      "path": "App/llama/ggml.dll",
+      "size": 79872,
+      "sha256": "2dc74873c47a09294431af997f7d5c31bdbc0eafc49c2c30ea03b7331c1a5c3c"
+    },
+    {
+      "path": "App/llama/libomp.dll",
+      "size": 768000,
+      "sha256": "a12116ba72d1d6820407cf30be23da04ce79d6bb8a71a5ee71759c5a1faa6f1c"
+    },
+    {
+      "path": "App/llama/LICENSE-llama.cpp.txt",
+      "size": 1078,
+      "sha256": "94f29bbed6a22c35b992c5c6ebf0e7c92f13b836b90f36f461c9cf2f0f1d010d"
+    },
+    {
+      "path": "App/llama/LICENSE-LLVM-OpenMP",
+      "size": 19741,
+      "sha256": "fdad1758a9e1f9d5a81e18879b3406772115edc92c24bfa36b70c654f325e8e4"
+    },
+    {
+      "path": "App/llama/llama-common.dll",
+      "size": 7924224,
+      "sha256": "cb5011455243a8b6a91fed00fbb33d93fdb53fa7c417fc59f27a004af85d7d9b"
+    },
+    {
+      "path": "App/llama/llama-server-impl.dll",
+      "size": 9170944,
+      "sha256": "8bdf535224880cf5b919ada99e6cb225338cce4d444b8e5b4acd1e2bb10bc0a0"
+    },
+    {
+      "path": "App/llama/llama-server.exe",
+      "size": 9216,
+      "sha256": "7e236243c9b670c6a49410c03186fd575c57a0efe3fd8a21d8727503d571d5b6"
+    },
+    {
+      "path": "App/llama/llama.dll",
+      "size": 3311616,
+      "sha256": "48d2b52f4d6b2d7db2ca4698edbb95ecb4511b792396c566e1340668b6415a71"
+    },
+    {
+      "path": "App/llama/mtmd.dll",
+      "size": 1795072,
+      "sha256": "817ba2841e73b9ef1170f2e235d30ef4cca5d4ec520a4817ca60e3737cff79ad"
+    },
+    {
+      "path": "App/llama/runtime-manifest.json",
+      "size": 5441,
+      "sha256": "c458384a60d32fa59f9807771b978d6cd42a1241fc115c1cb74c69d2000bcd6a"
+    },
+    {
+      "path": "App/mfc100.dll",
+      "size": 4342088,
+      "sha256": "bf38dda13b938b49a4df72b6477342373ee6e151be12c25cb0c17662fcb4bcd4"
+    },
+    {
+      "path": "App/mfc100chs.dll",
+      "size": 36176,
+      "sha256": "8d1e7fb72bceb10215108d48fe4fa6aea1f03636f56fc3be5e6d5552c4094c46"
+    },
+    {
+      "path": "App/mfc100cht.dll",
+      "size": 36176,
+      "sha256": "90adefdcd57c9ce8c5e542fcbda108860427e9334bd9bfe564ad5556683bc954"
+    },
+    {
+      "path": "App/mfc100deu.dll",
+      "size": 64336,
+      "sha256": "ce1fc625509d697a2cd174115a593158ad9eed5b97967e619421696fc01d381e"
+    },
+    {
+      "path": "App/mfc100enu.dll",
+      "size": 55120,
+      "sha256": "14c4069cd931e9cd3f519d321ce50e4e531c385403c124ffee7ca7831b0adb63"
+    },
+    {
+      "path": "App/mfc100esn.dll",
+      "size": 63824,
+      "sha256": "dc5abb34069e3e8e1451e36b44822def82b624f9811f825d417874202a4a242c"
+    },
+    {
+      "path": "App/mfc100fra.dll",
+      "size": 64336,
+      "sha256": "6ab663a7c7a648dddb428acdbc8cbc91c66c93a52323df1a519bfeaea9a4f6ec"
+    },
+    {
+      "path": "App/mfc100ita.dll",
+      "size": 62288,
+      "sha256": "7e36ba0e433f5478b1f405388870533ee2b631a4bee992eb6c5708797a8e0b25"
+    },
+    {
+      "path": "App/mfc100jpn.dll",
+      "size": 43856,
+      "sha256": "93ccf853a22ad5c9a3bc9f0d87fab3e356c728332e5968e38b3751c03179b06a"
+    },
+    {
+      "path": "App/mfc100kor.dll",
+      "size": 43344,
+      "sha256": "c3dc021011fe766d54927f6865936b3b9473e5bc38bb1bbacb94a0c739c4a16d"
+    },
+    {
+      "path": "App/mfc100rus.dll",
+      "size": 60752,
+      "sha256": "8597aff5549e1f14805f288ce69c0dce270ed0c1d6515a4c923004f0d753240c"
+    },
+    {
+      "path": "App/mfc100u.dll",
+      "size": 4368720,
+      "sha256": "7a4cfbce1eb48d4f8988212c2e338d7781b9894ef0f525e871c22bb730a74f3e"
+    },
+    {
+      "path": "App/mfcm100.dll",
+      "size": 80208,
+      "sha256": "0fef52f0378b75600b828172377dea92f8ce4f9cb2e0dcee5d96300ea6d102dd"
+    },
+    {
+      "path": "App/mfcm100u.dll",
+      "size": 80720,
+      "sha256": "d9a7c9ecf9c022b2fbfe1efeea5215a7caa2bf95674fa88dd5e35afdb310e80a"
+    },
+    {
+      "path": "App/msdia100.dll",
+      "size": 799568,
+      "sha256": "6c45957e8bfe773fc4f9055f8e1f88c4c7105c23b039526b07fb1921410f7574"
+    },
+    {
+      "path": "App/msvcp100.dll",
+      "size": 421200,
+      "sha256": "a3ba6421991241bea9c8334b62c3088f8f131ab906c3cc52113945d05016a35f"
+    },
+    {
+      "path": "App/msvcr100.dll",
+      "size": 770384,
+      "sha256": "1221a09484964a6f38af5e34ee292b9afefccb3dc6e55435fd3aaf7c235d9067"
+    },
+    {
+      "path": "App/Newtonsoft.Json.dll",
+      "size": 576040,
+      "sha256": "6a168461c721fd14163751f7839fb8d67483cb5831f1b2b1ab3e96a68b82d384"
+    },
+    {
+      "path": "App/Newtonsoft.xml.dll",
+      "size": 716288,
+      "sha256": "2833e96b8166c86aae59199ba9df560b1d672085b62dbba6f0a644142380c708"
+    },
+    {
+      "path": "App/Noesis.Javascript.dll",
+      "size": 2520064,
+      "sha256": "7ab4339cda5616752c9889358e54a16756aedf647b88f53b53d2d952505f34c1"
+    },
+    {
+      "path": "App/tessdata/chi_sim.traineddata",
+      "size": 2469156,
+      "sha256": "a5fcb6f0db1e1d6d8522f39db4e848f05984669172e584e8d76b6b3141e1f730"
+    },
+    {
+      "path": "App/tessdata/eng.traineddata",
+      "size": 4113088,
+      "sha256": "7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2"
+    },
+    {
+      "path": "App/Tesseract.dll",
+      "size": 133120,
+      "sha256": "bc2ad67ab5fb9e80e5e60f1a422a1f44f830fb1b9a77579e85a634b1a9630840"
+    },
+    {
+      "path": "App/vcomp100.dll",
+      "size": 51024,
+      "sha256": "2011268947625670a758382e811c71b597b615f1763f8d30a5195b80da4644fc"
+    },
+    {
+      "path": "App/wcocr.dll",
+      "size": 155648,
+      "sha256": "a349ce3dd72014cadf2e11882334292d76010b91fbe32ac28e015943f2055a90"
+    },
+    {
+      "path": "App/wxocr.exe",
+      "size": 196096,
+      "sha256": "f047661aecccd73fda9c39051d1a7483d500a2dd31c0e9cd7a70f1191886c50e"
+    },
+    {
+      "path": "App/wxocr.exe.config",
+      "size": 460,
+      "sha256": "f8472e64e921745c504375762155e8579589b8975b3dd7e3d3aa948688ef4724"
+    },
+    {
+      "path": "App/x64/leptonica-1.82.0.dll",
+      "size": 4168192,
+      "sha256": "dfcb3e6ed0b16bc55bfdbcf53543cfe42a354b87c3e35bd3a95eebf005d73e76"
+    },
+    {
+      "path": "App/x64/tesseract50.dll",
+      "size": 2788352,
+      "sha256": "de4d04ec75095374d98f5dd7a60d14d7e2e0f76589db693eccf7ae658be8cb2b"
+    },
+    {
+      "path": "App/XtransNoLogin-doubleR-mode.exe",
+      "size": 1024512,
+      "sha256": "6793a4c19e1e168f1d13e51333e92f314561ed07e0739deef3c64d1928361aac"
+    },
+    {
+      "path": "App/XtransNoLogin-F1-mode.exe",
+      "size": 1022976,
+      "sha256": "fc61e7d921c464d0b5b441f752e34dc7aeffb9f4d6623e19937e9a8c5fafaed2"
+    },
+    {
+      "path": "App/XtransNoLogin-select-mode.exe",
+      "size": 1022976,
+      "sha256": "a738f9b1371d4893c15e26b2abb9f6ab7ad9c5375c277eb974db28a218ea6b75"
+    },
+    {
+      "path": "App/YiChuang.exe",
+      "size": 1573888,
+      "sha256": "c198a265ab48d0d4d93c3f07e7748af5e22cb8c8c99d23f9aeb1f875e22a02bd"
+    },
+    {
+      "path": "App/YiChuang.exe.config",
+      "size": 460,
+      "sha256": "f8472e64e921745c504375762155e8579589b8975b3dd7e3d3aa948688ef4724"
+    }
+  ]
+}

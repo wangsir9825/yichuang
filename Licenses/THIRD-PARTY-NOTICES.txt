@@ -1,0 +1,22 @@
+Independent offline OCR bundled with YiChuang 1.4.0
+
+Tesseract OCR 5.2 / Charles Weld Tesseract .NET wrapper 5.2.0:
+Apache License 2.0. https://github.com/tesseract-ocr/tesseract
+https://github.com/charlesw/tesseract
+Leptonica 1.82.0: BSD license. https://github.com/DanBloomberg/leptonica
+tessdata_fast 4.1.0 (chi_sim and eng): Apache License 2.0.
+https://github.com/tesseract-ocr/tessdata_fast/tree/4.1.0
+InteropDotNet: MIT license, copyright (c) 2014 Andrey Akinshin.
+https://github.com/AndreyAkinshin/InteropDotNet
+Original dependency binaries and OCR data are distributed unmodified.
+Full license texts are included in this directory.
+
+The WeChat OCR engine and its model files are NOT included.
+An existing local WeChat installation is used when available; otherwise
+the bundled independent offline OCR is used.
+
+Setup built using Inno Setup: https://jrsoftware.org/isinfo.php
+Microsoft .NET Framework and Visual C++ runtime installers are original
+Microsoft redistributables, subject to their own accompanying terms.
+Ollama and translation models are optional downloads from their providers
+and are NOT included in this package. See their respective licenses.
