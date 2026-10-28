@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
@@ -16,27 +16,28 @@ class UiRepairRegression {
  static void Check(bool ok,string message){if(!ok)throw new Exception(message);}
  static void Render(Control c,string file){using(var b=new Bitmap(c.Width,c.Height)){c.DrawToBitmap(b,new Rectangle(0,0,c.Width,c.Height));b.Save(file);}}
  static void CheckSettingsNavigation(Form settings,Assembly app,string output){
+  settings.GetType().GetField("EngineChangesPrompt",Private).SetValue(settings,(Func<DialogResult>)(()=>DialogResult.Yes));
   Action<string> show=key=>{settings.GetType().GetMethod("ShowPage").Invoke(settings,new object[]{key});Application.DoEvents();};
   show("引擎管理");var content=(Panel)Field(settings,"content");var manager=content.Controls[0];
   var list=(CheckedListBox)manager.Controls.Find("ManagedEngines",true)[0];var edit=(Button)manager.Controls.Find("EditEngine",true)[0];
   var save=(Button)settings.Controls.Find("SaveSettings",true)[0];
   var registry=app.GetType("YiChuang.EngineRegistry");string before=string.Join(",",(int[])registry.GetProperty("VisibleIds").GetValue(null,null));string order=string.Join(",",(int[])registry.GetProperty("ActiveIds").GetValue(null,null));
-  foreach(int id in new[]{6,14,16,17,18,19}){
+  foreach(int id in new[]{6,14,18,19}){
    for(int i=0;i<list.Items.Count;i++)if((int)list.Items[i].GetType().GetField("Id").GetValue(list.Items[i])==id)list.SelectedIndex=i;
-   edit.PerformClick();Application.DoEvents();Check(content.Controls[0]!=manager&&save.Text=="保存并返回","Missing engine-level navigation: "+id);
+   edit.PerformClick();Application.DoEvents();Check(content.Controls[0]!=manager&&save.Text=="保存"&&settings.Controls.Find("ApplySettings",true)[0].Visible&&settings.Controls.Find("ReturnSettings",true)[0].Visible,"Missing engine-level actions: "+id);
    var picker=(ComboBox)settings.Controls.Find("SettingsEnginePicker",true)[0];Check(picker.Width>180&&picker.Parent.ClientRectangle.Contains(picker.Bounds),"Engine picker is clipped: "+id);
    if(id==14){settings.Controls.Find("DeepSeekModel",true)[0].Text="navigation-draft-model";}
    foreach(Button b in ((FlowLayoutPanel)Field(settings,"navigation")).Controls)if((string)b.Tag=="引擎管理")b.PerformClick();Application.DoEvents();Check(!settings.IsDisposed&&settings.Visible&&content.Controls[0]==manager,"Back closed settings: "+id);
    Check((int)list.SelectedItem.GetType().GetField("Id").GetValue(list.SelectedItem)==id,"Back lost selected engine: "+id);
    edit.PerformClick();Application.DoEvents();if(id==14)Check(settings.Controls.Find("DeepSeekModel",true)[0].Text=="navigation-draft-model","Return discarded draft");
    if(id==6)Render(settings,Path.Combine(output,"native-settings-engine-navigation.png"));
-   save.PerformClick();Application.DoEvents();Check(!settings.IsDisposed&&settings.Visible&&content.Controls[0]==manager&&save.Text=="保存并关闭","Save-and-return closed settings: "+id);
+   save.PerformClick();Application.DoEvents();Check(!settings.IsDisposed&&settings.Visible&&content.Controls[0]==manager&&save.Text=="保存"&&settings.Controls.Find("ReturnSettings",true)[0].Text=="退出","Save-and-return closed settings: "+id);
    Check((int)list.SelectedItem.GetType().GetField("Id").GetValue(list.SelectedItem)==id,"Save lost selection: "+id);
   }
   edit.PerformClick();Application.DoEvents();foreach(Button b in ((FlowLayoutPanel)Field(settings,"navigation")).Controls)if((string)b.Tag=="引擎管理")b.PerformClick();
   Check(content.Controls[0]==manager&&settings.Visible,"Active sidebar engine item did not return to list");
   Check(before==string.Join(",",(int[])registry.GetProperty("VisibleIds").GetValue(null,null))&&order==string.Join(",",(int[])registry.GetProperty("ActiveIds").GetValue(null,null)),"Navigation changed visibility/order");
-  Log.Add("Six built-in editors: return/save keep settings open, preserve selection/drafts/order/visibility, sidebar return and engine-picker geometry: passed");
+  Log.Add("Four built-in editors: save/apply/return available; confirmed sidebar save and save return keep settings open, preserve selection/order/visibility and engine-picker geometry: passed");
  }
  [STAThread]static int Main(string[] args){
   string output=Path.GetFullPath(args[1]);Directory.CreateDirectory(output);

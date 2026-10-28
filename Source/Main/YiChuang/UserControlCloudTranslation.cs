@@ -32,7 +32,7 @@ namespace YiChuang
                 AddRow(table,"接口地址",endpoint);endpoint.TextChanged+=(s,e)=>ClassMain.QwenEndpoint=endpoint.Text.Trim();
                 AddRow(table,"地域/空间",new Label {AutoSize=true,MaximumSize=new Size(370,0),Text="默认北京地域。可填百炼业务空间专属地址，\r\n地址以 /compatible-mode/v1 结尾；密钥须匹配地域。"});
             }
-            var note=new Label {AutoSize=true,MaximumSize=new Size(500,0),Text="填写后点下方“保存并返回”，在主窗口引擎菜单选择 "+title+"。\r\n单词和段落使用所选引擎；缺少密钥或请求失败会提示，不自动改用其他服务。\r\n此为在线API，所译原文会发送至配置的服务；费用与配额由服务商管理。",Margin=new Padding(3,18,3,3)};
+            var note=new Label {AutoSize=true,MaximumSize=new Size(500,0),Text="填写后点击“保存”返回列表，或点击“应用”继续编辑。\r\n在主窗口引擎菜单选择 "+title+"。\r\n单词和段落使用所选引擎；缺少密钥或请求失败会提示，不自动改用其他服务。\r\n此为在线API，所译原文会发送至配置的服务；费用与配额由服务商管理。",Margin=new Padding(3,18,3,3)};
             table.Controls.Add(note,0,table.RowCount++);table.SetColumnSpan(note,2);
         }
         private static void AddRow(TableLayoutPanel table,string label,Control control)

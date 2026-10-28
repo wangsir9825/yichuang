@@ -102,7 +102,7 @@ namespace YiChuang
         {
             if(!current()) throw new OperationCanceledException();
             ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
-            var request=(HttpWebRequest)WebRequest.Create(url);
+            var request=NetworkProxy.Create(url);
             request.Method="POST";request.ContentType="application/json; charset=utf-8";request.Accept="application/json";
             request.AllowAutoRedirect=false;request.Timeout=timeout;request.ReadWriteTimeout=timeout;
             if(engine==GeminiEngine) request.Headers["x-goog-api-key"]=key;
@@ -129,7 +129,8 @@ namespace YiChuang
                 if(response!=null)
                 {
                     int status=(int)response.StatusCode;response.Dispose();string hint;
-                    if(status==401 || status==403) hint=engine==GeminiEngine ?
+                    if(status==407) hint=NetworkProxy.FailureHint(ex,status);
+                    else if(status==401 || status==403) hint=engine==GeminiEngine ?
                         "请检查完整密钥、Google API启用状态和账号访问权限。" : "请检查完整密钥、访问权限及密钥与百炼地域是否匹配。";
                     else if(status==429) hint="请求频繁或配额不足，请在服务商控制台检查额度后重试。";
                     else if(status==404) hint="请检查模型名称和接口地址，模型可能不可用。";
@@ -139,7 +140,7 @@ namespace YiChuang
                 }
                 if(DateTime.UtcNow>=deadline || ex.Status==WebExceptionStatus.Timeout)
                     throw new InvalidOperationException(Name(engine)+" 请求超时，请检查网络或缩短原文后重试。");
-                throw new InvalidOperationException(Name(engine)+" 无法连接，请检查网络、系统代理和接口地址。");
+                throw new InvalidOperationException(Name(engine)+" 无法连接。"+NetworkProxy.FailureHint(ex));
             }
             catch(IOException) { if(!current())throw new OperationCanceledException(); throw new InvalidOperationException(Name(engine)+" 连接中断，请重试。"); }
         }

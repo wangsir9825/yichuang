@@ -22,6 +22,8 @@ namespace YiChuang {
    string text=e.KeyCode==Keys.Back?fallback:(e.Control?"Ctrl + ":"")+(e.Alt?"Alt + ":"")+(e.Shift?"Shift + ":"")+e.KeyCode;
    try{ClassSetHotKey.ParseShortcut(text,"+");input.Text=text;error.Text="";}catch(Exception ex){error.Text=ex.Message;}
   };}
-  internal bool Apply(){string message;bool valid=ClassSetHotKey.TryApply(shortcut.Text,translate.Text,out message);error.Text=message;return valid;}
+  internal string[] Values {get{return new[]{shortcut.Text,translate.Text};}}
+  internal void RestoreValues(string[] values){shortcut.Text=values[0];translate.Text=values[1];ClassMain.快捷键隐藏显示=values[0];UiPreferences.TranslateShortcut=values[1];error.Text="";}
+  internal bool Apply(){if(shortcut.Text==ClassMain.快捷键隐藏显示&&translate.Text==UiPreferences.TranslateShortcut){error.Text="";return true;}string message;bool valid=ClassSetHotKey.TryApply(shortcut.Text,translate.Text,out message);error.Text=message;return valid;}
  }
 }

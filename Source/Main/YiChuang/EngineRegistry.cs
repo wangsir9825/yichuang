@@ -20,7 +20,7 @@ namespace YiChuang
     // Stable IDs are independent of menu order. The registry is stored inside the existing encrypted settings/backup.
     public static class EngineRegistry
     {
-        public static readonly int[] BuiltinIds = {4,5,6,14,16,17,18,19};
+        public static readonly int[] BuiltinIds = {4,5,6,14,18,19};
         public static readonly int[] DefaultVisibleIds = {4,5,14,18};
         private static readonly object Gate = new object();
         private static List<int> active = new List<int>(BuiltinIds);
@@ -137,8 +137,12 @@ namespace YiChuang
             var s=JsonConvert.DeserializeObject<State>(json);
             if(s==null||(s.Version!=1&&s.Version!=2)||s.Active==null||s.Custom==null||s.NextId>=int.MaxValue-1||s.Active.Count>100||s.Custom.Count>100||s.Active.Distinct().Count()!=s.Active.Count||s.Custom.Any(e=>e==null)||s.Custom.Select(e=>e.Id).Distinct().Count()!=s.Custom.Count||s.Custom.Any(e=>e.Id<1000||e.Id>=int.MaxValue-1))throw new InvalidOperationException("引擎配置格式无效。");
             foreach(var e in s.Custom)Validate(e);
-            if(s.Active.Any(id=>!IsBuiltin(id)&&!s.Custom.Any(e=>e.Id==id))||s.Custom.Any(e=>!s.Active.Contains(e.Id)))throw new InvalidOperationException("引擎编号不一致。");
+            if(s.Active.Any(id=>!IsBuiltin(id)&&id!=16&&id!=17&&!s.Custom.Any(e=>e.Id==id))||s.Custom.Any(e=>!s.Active.Contains(e.Id)))throw new InvalidOperationException("引擎编号不一致。");
             if(s.Version==2&&(s.Visible==null||s.Visible.Distinct().Count()!=s.Visible.Count||s.Visible.Any(id=>!s.Active.Contains(id))))throw new InvalidOperationException("引擎显示列表无效。");
+            // Retired preset IDs remain valid input for old encrypted settings/backups.
+            // Remove only their menu entries; custom definitions and model files are untouched.
+            s.Active.RemoveAll(id=>id==16||id==17);
+            s.Visible?.RemoveAll(id=>id==16||id==17);
             return s;
         }
         internal static void ValidateImport(string json) { if(!string.IsNullOrWhiteSpace(json))ParseState(json); }
@@ -148,6 +152,7 @@ namespace YiChuang
                 if(string.IsNullOrWhiteSpace(json)){active=new List<int>(BuiltinIds);visible=new HashSet<int>(DefaultVisibleIds);custom=new List<EngineDefinition>();nextId=1000;unreadable=null;LoadError=null;return;}
                 try {
                     var s=ParseState(json);
+                    if(ClassMain.isjiekounum==16||ClassMain.isjiekounum==17)ClassMain.isjiekounum=0;
                     active=s.Active;visible=new HashSet<int>(s.Version==1?active.Where(id=>DefaultVisibleIds.Contains(id)):s.Visible);custom=s.Custom;nextId=Math.Max(1000,Math.Max(s.NextId,custom.Count==0?1000:custom.Max(e=>e.Id)+1));unreadable=null;LoadError=null;
                 } catch {
                     active=new List<int>();visible=new HashSet<int>();custom=new List<EngineDefinition>();unreadable=json;

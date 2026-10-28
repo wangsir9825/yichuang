@@ -44,7 +44,7 @@ class FontPersistenceRegression
                 Stage("Modal found; checking controls");
                 try{action(settings);}catch(Exception ex){failure=ex;}
                 Button save=null;
-                Action<Control> find=null;find=c=>{if(c is Button&&c.Text=="保存并关闭")save=(Button)c;foreach(Control child in c.Controls)find(child);};find(settings);
+                Action<Control> find=null;find=c=>{if(c is Button&&c.Name=="SaveSettings")save=(Button)c;foreach(Control child in c.Controls)find(child);};find(settings);
                 if(save!=null)save.PerformClick();else settings.Close();
                 Stage("Modal save/close complete");
             };
@@ -59,7 +59,7 @@ class FontPersistenceRegression
         string raw=(string)MainType.GetMethod("readJiekou").Invoke(null,null);
         var values=new JavaScriptSerializer().Deserialize<Dictionary<string,object>>(raw);
         Assert(Convert.ToSingle(values["translationFontSize"])==expected,"Saved translation size differs");
-        Assert(Convert.ToSingle(values["originalFontSize"])==9,"Translation font changes original font size");
+        Assert(Convert.ToSingle(values["originalFontSize"])==12,"Translation font changes original font size");
     }
     static Form MainForm()
     {

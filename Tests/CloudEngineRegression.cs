@@ -103,13 +103,14 @@ class CloudEngineRegression
                 Assert(main.GetType().GetField(name+"ToolStripMenuItem",Private)==null,"Removed menu remains compiled");
             using(var settings=(Form)Activator.CreateInstance(app.GetType("YiChuang.Frmsetting")))
             {
+                settings.GetType().GetField("EngineChangesPrompt",Private).SetValue(settings,(Func<DialogResult>)(()=>DialogResult.Yes));
                 settings.Opacity=0;settings.Show(main);Application.DoEvents();
-                var tree=(FlowLayoutPanel)settings.Controls.Find("SettingsNavigation",true)[0];Assert(tree.Controls.Count==5&&((string[])settings.GetType().GetProperty("SettingsPageTitles").GetValue(settings,null)).Length==10,"Settings pages did not remove eight/add two");
-                settings.GetType().GetMethod("ShowPage").Invoke(settings,new object[]{"7：Google Gemini AI翻译"});Application.DoEvents();
+                var tree=(FlowLayoutPanel)settings.Controls.Find("SettingsNavigation",true)[0];Assert(tree.Controls.Count==6&&((string[])settings.GetType().GetProperty("SettingsPageTitles").GetValue(settings,null)).Length==10,"Settings pages did not remove eight/add two");
+                settings.GetType().GetMethod("ShowPage").Invoke(settings,new object[]{"5：Google Gemini AI翻译"});Application.DoEvents();
                 var key=(TextBox)settings.Controls.Find("GeminiApiKey",true)[0];Assert(key.UseSystemPasswordChar,"Gemini key visible");key.Text="gemini-test-key";
                 ((TextBox)settings.Controls.Find("GeminiModel",true)[0]).Text="gemini-3.8-flash";
                 Assert(settings.Controls.Find("GeminiDirection",true).Length==0,"Gemini direction remains in settings");
-                settings.GetType().GetMethod("ShowPage").Invoke(settings,new object[]{"8：Qwen-MT Plus AI翻译"});Application.DoEvents();
+                settings.GetType().GetMethod("ShowPage").Invoke(settings,new object[]{"6：Qwen-MT Plus AI翻译"});Application.DoEvents();
                 key=(TextBox)settings.Controls.Find("QwenApiKey",true)[0];Assert(key.UseSystemPasswordChar,"Qwen key visible");key.Text="qwen-test-key";
                 Assert(settings.Controls.Find("QwenDirection",true).Length==0,"Qwen direction remains in settings");settings.Close();
             }

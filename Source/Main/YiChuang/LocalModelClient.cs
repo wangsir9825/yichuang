@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.IO;
 using System.Net;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Collections.Generic;
@@ -295,12 +296,36 @@ namespace YiChuang
             }
             finally { if (entered) Monitor.Exit(InferenceGate); }
         }
+        private static bool OllamaPortClosed(Uri endpoint,Func<bool> current)
+        {
+            // HttpWebRequest can spend longer retrying a refused local connection
+            // than the release probe's HTTP timeout. Only a definite refusal means
+            // it is safe to skip Ollama; a listening but stalled server still fails.
+            EnsureCurrent(current);
+            using(var socket=new TcpClient()) {
+                var connect=socket.BeginConnect(endpoint.DnsSafeHost,endpoint.Port,null,null);
+                using(var ready=connect.AsyncWaitHandle) {
+                    var watch=Stopwatch.StartNew();
+                    while(!ready.WaitOne(50)) {
+                        EnsureCurrent(current);
+                        if(watch.ElapsedMilliseconds>=5000)throw new InvalidOperationException("无法确认 Ollama 是否已释放模型，请检查本地服务后重试。");
+                    }
+                    EnsureCurrent(current);
+                    try {socket.EndConnect(connect);return false;}
+                    catch(SocketException ex) {
+                        if(ex.SocketErrorCode==SocketError.ConnectionRefused)return true;
+                        throw new InvalidOperationException("无法检查 Ollama 状态，请检查本地服务后重试。",ex);
+                    }
+                }
+            }
+        }
         private static void ReleaseForLlama(Func<bool> current,Action<string> progress)
         {
             var endpoints=new HashSet<string>();
             if(lastEndpoint!=null)endpoints.Add(lastEndpoint);
             try{endpoints.Add(ValidateEndpoint(LocalModelSettings.Endpoint).AbsoluteUri);}catch(InvalidOperationException){}
             foreach(string address in endpoints) {
+                if(OllamaPortClosed(new Uri(address),current))continue;
                 var names=new HashSet<string>{LocalModelSettings.HunyuanModel,LocalModelSettings.GemmaModel};HashSet<string> previous;if(UsedModels.TryGetValue(address,out previous))names.UnionWith(previous);
                 JObject loaded;
                 try{loaded=Request(new Uri(address),"api/ps",null,2000,current);}

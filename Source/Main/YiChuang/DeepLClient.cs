@@ -37,9 +37,9 @@ namespace YiChuang
                     payload["source_lang"] = source.Trim().ToUpperInvariant();
             }
             payload["target_lang"] = target.Trim().ToUpperInvariant();
-            // Keep the operating system's configured proxy and certificate validation.
+            // Use the global network route while preserving certificate validation.
             ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
-            var request = (HttpWebRequest)WebRequest.Create("https://" + host + "/v2/translate");
+            var request = NetworkProxy.Create("https://" + host + "/v2/translate");
             request.Method = "POST";
             request.ContentType = "application/json; charset=utf-8";
             request.Accept = "application/json";
@@ -88,6 +88,7 @@ namespace YiChuang
                         case 400: throw new InvalidOperationException("DeepL 请求参数有误（HTTP 400），请检查语言代码。");
                         case 401:
                         case 403: throw new InvalidOperationException("DeepL API 认证失败（HTTP " + status + "），请检查完整密钥和账号类型。");
+                        case 407: throw new InvalidOperationException(NetworkProxy.FailureHint(ex,status));
                         case 429: throw new InvalidOperationException("DeepL 请求过于频繁（HTTP 429），请稍后重试。");
                         case 456: throw new InvalidOperationException("DeepL 翻译额度已用完（HTTP 456），请查看账号 API usage。");
                         default: throw new InvalidOperationException("DeepL 服务请求失败（HTTP " + status + "），请稍后重试。");

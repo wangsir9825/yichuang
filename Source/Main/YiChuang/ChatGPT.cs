@@ -25,7 +25,7 @@ namespace YiChuang
             ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
             using(var lifetime = new RequestLifetime(current,60000))
             try {
-                var request=(HttpWebRequest)WebRequest.Create("https://api.deepseek.com/v1/chat/completions");
+                var request=NetworkProxy.Create("https://api.deepseek.com/v1/chat/completions");
                 lifetime.Attach(request);request.Method="POST";request.ContentType="application/json; charset=utf-8";
                 request.Headers["Authorization"]="Bearer "+apiKey.Trim();request.ServicePoint.Expect100Continue=false;
                 byte[] bytes=Encoding.UTF8.GetBytes(payload.ToString(Formatting.None));request.ContentLength=bytes.Length;
@@ -37,8 +37,9 @@ namespace YiChuang
             } catch(WebException ex) {
                 int status=0;if(ex.Response!=null){using(var response=ex.Response) { var http=response as HttpWebResponse;if(http!=null)status=(int)http.StatusCode; }}
                 lifetime.Check();
+                if(status==407)throw new InvalidOperationException(NetworkProxy.FailureHint(ex,status));
                 if(status==401||status==403)throw new InvalidOperationException("API 认证失败（HTTP "+status+"），请检查完整的DeepSeek API Key。");
-                string hint=status==401||status==403?"请检查API Key。":status==402?"账号额度不足。":status==429?"请求频繁或额度不足，请稍后重试。":status==400||status==404?"请检查模型名称和参数。":"请检查网络或稍后重试。";
+                string hint=status==401||status==403?"请检查API Key。":status==402?"账号额度不足。":status==429?"请求频繁或额度不足，请稍后重试。":status==400||status==404?"请检查模型名称和参数。":NetworkProxy.FailureHint(ex,status);
                 throw new InvalidOperationException("DeepSeek请求失败"+(status>0?"（HTTP "+status+"）":"")+"，"+hint);
             } catch(IOException) { lifetime.Check();throw new InvalidOperationException("DeepSeek连接中断，译文未完成，请重试。"); }
         }

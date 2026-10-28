@@ -216,17 +216,17 @@ namespace YiChuang
 
 		public static int splitterNum = 100;
 
-		public static float translationFontSize = 11f;
+		public static float translationFontSize = 12f;
 
 		public static int translationLineSpacing = 350;
 
-		public static string translationFontType = "黑体";
+		public static string translationFontType = "微软雅黑";
 
-		public static float originalFontSize = 9f;
+		public static float originalFontSize = 12f;
 
 		public static int originalLineSpacing = 250;
 
-		public static string originalFontType = "宋体";
+		public static string originalFontType = "微软雅黑";
 
 		public static ArrayList listfont = ((global::CF9E7600)_63AF42A1._71AC5D16[715])();
 
@@ -459,7 +459,7 @@ namespace YiChuang
 			{
 				FileStream fileStream = ((global::_200D2A19)_63AF42A1._71AC5D16[210])(text2, FileMode.Append, FileAccess.Write, FileShare.ReadWrite);
 				HttpWebRequest httpWebRequest = ((global::_5B37291E)_63AF42A1._71AC5D16[678])(url) as HttpWebRequest;
-				((global::_8B96D7B3)_63AF42A1._71AC5D16[55])(httpWebRequest, null);
+				NetworkProxy.Apply(httpWebRequest);
 				HttpWebResponse _9EBBE = ((global::_341A0726)_63AF42A1._71AC5D16[387])(httpWebRequest) as HttpWebResponse;
 				Stream stream = ((global::C1981588)_63AF42A1._71AC5D16[272])(_9EBBE);
 				byte[] array = new byte[1024];
@@ -514,6 +514,7 @@ namespace YiChuang
 			dictionary.Add("originalLineSpacing", ((global::_898B04B1)_63AF42A1._71AC5D16[352])(ref originalLineSpacing) ?? "");
 			dictionary.Add("originalFontType", originalFontType ?? "");
 			UiPreferences.Write(dictionary);
+            NetworkProxy.Write(dictionary);
             LocalModelSettings.WriteMainSettings(dictionary);
             dictionary.Add("ShortcutkeyHiddenDisplay", 快捷键隐藏显示 ?? "");
 			dictionary.Add("ShortcutKeySwitchesTheWindowClockwise", 快捷键顺时针切换窗口 ?? "");
@@ -688,7 +689,9 @@ namespace YiChuang
 			}
 		}
 
-		public static void jiluset()
+		public static void jiluset() { SaveSettings(null); }
+
+        internal static void SaveSettings(NetworkProxyOptions proxyDraft)
 		{
 			try
 			{
@@ -716,6 +719,7 @@ namespace YiChuang
 				dictionary.Add("originalLineSpacing", ((global::_898B04B1)_63AF42A1._71AC5D16[352])(ref originalLineSpacing) ?? "");
 				dictionary.Add("originalFontType", originalFontType ?? "");
 				UiPreferences.Write(dictionary);
+            NetworkProxy.Write(dictionary,proxyDraft);
             LocalModelSettings.WriteMainSettings(dictionary);
             dictionary.Add("ShortcutkeyHiddenDisplay", 快捷键隐藏显示 ?? "");
 				dictionary.Add("ShortcutKeySwitchesTheWindowClockwise", 快捷键顺时针切换窗口 ?? "");
@@ -785,6 +789,7 @@ namespace YiChuang
 			if (string.IsNullOrWhiteSpace(strSetting)) strSetting = "{}";
 			JObject _08A7893D = ((global::C52E42B4)_63AF42A1._71AC5D16[744])(strSetting);
             UiPreferences.Read(_08A7893D);
+            NetworkProxy.Read(_08A7893D);
             LocalModelSettings.ReadMainSettings(_08A7893D);
             EngineRegistry.Import((string)_08A7893D["EngineRegistry"]);
             GeminiKey=(string)_08A7893D["GeminiKey"] ?? "";

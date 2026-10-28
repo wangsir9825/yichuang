@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -101,7 +101,7 @@ namespace YiChuang
             if(offset<spec.Size) {
                 var uri=new Uri(spec.Url);if(uri.Scheme!="https"&&!uri.IsLoopback)throw new IOException("模型下载地址必须使用 HTTPS。");
                 ServicePointManager.SecurityProtocol|=SecurityProtocolType.Tls12;
-                var request=(HttpWebRequest)WebRequest.Create(uri);request.Timeout=30000;request.ReadWriteTimeout=60000;request.UserAgent="YiChuang/1.5";
+                var request=NetworkProxy.Create(uri);request.Timeout=30000;request.ReadWriteTimeout=60000;request.UserAgent="YiChuang/1.5";
                 if(offset>0)request.AddRange(offset);
                 using(token.Register(()=>request.Abort()))try {
                     using(var response=(HttpWebResponse)request.GetResponse()) {
@@ -117,7 +117,7 @@ namespace YiChuang
                             while((n=input.Read(b,0,b.Length))>0){token.ThrowIfCancellationRequested();if(offset+n>spec.Size)throw new IOException("模型下载超出发布清单大小，已停止。");output.Write(b,0,n);offset+=n;if(clock.ElapsedMilliseconds>200){progress?.Invoke("正在下载 "+spec.Name+"："+(offset*100.0/spec.Size).ToString("F1")+"%（"+(offset/1048576)+" / "+(spec.Size/1048576)+" MB）");clock.Restart();}}
                         }
                     }
-                }catch(WebException ex){ex.Response?.Dispose();token.ThrowIfCancellationRequested();throw new IOException("模型下载连接失败，请检查网络后重试；已下载部分会保留。",ex);}
+                }catch(WebException ex){ex.Response?.Dispose();token.ThrowIfCancellationRequested();throw new IOException("模型下载连接失败；已下载部分会保留。"+NetworkProxy.FailureHint(ex,ex.Response is HttpWebResponse?(int)((HttpWebResponse)ex.Response).StatusCode:0),ex);}
                 catch(IOException){token.ThrowIfCancellationRequested();throw;}
             }
             token.ThrowIfCancellationRequested();if(new FileInfo(partial).Length!=spec.Size)throw new IOException("下载连接提前结束，请重试以继续下载。");

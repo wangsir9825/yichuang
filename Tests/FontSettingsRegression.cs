@@ -64,7 +64,7 @@ class FontSettingsRegression
                 translatedSize.SelectedValue="12";originalSize.SelectedValue="14";Application.DoEvents();
                 Assert((float)Value(main,"translationFontSize")==12f,"Selecting 12 did not update the saved setting");
                 Assert(Math.Abs(((RichTextBox)Member(form,"rtb译文")).Font.SizeInPoints-12f)<0.01,"Selecting 12 did not update the displayed font");
-                settings.Close();
+                ((Button)Find(settings,"SaveSettings")).PerformClick();
             }
             log.Add("Selecting translation 12pt and source 14pt updates display and saves: passed");
             var json=new JavaScriptSerializer().Deserialize<Dictionary<string,object>>((string)main.GetMethod("readJiekou").Invoke(null,null));

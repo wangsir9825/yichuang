@@ -14,8 +14,8 @@ namespace YiChuang
         private static HttpWebRequest Request(string url,RequestLifetime lifetime,CookieContainer cookies=null)
         {
             ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
-            var request=(HttpWebRequest)WebRequest.Create(url);lifetime.Attach(request);
-            request.UserAgent=UserAgent;request.Proxy=null;request.CookieContainer=cookies;request.ServicePoint.Expect100Continue=false;
+            var request=NetworkProxy.Create(url);lifetime.Attach(request);
+            request.UserAgent=UserAgent;request.CookieContainer=cookies;request.ServicePoint.Expect100Continue=false;
             return request;
         }
         private static JObject Post(HttpWebRequest request,JObject payload,RequestLifetime lifetime)
@@ -34,7 +34,7 @@ namespace YiChuang
         {
             using(var lifetime=new RequestLifetime(current,20000))
             try { lifetime.Check();return action(lifetime); }
-            catch(WebException ex) { int status=0;using(var response=ex.Response) {if(response is HttpWebResponse)status=(int)((HttpWebResponse)response).StatusCode;}lifetime.Check();throw new InvalidOperationException("网页翻译请求失败"+(status>0?"（HTTP "+status+"）":"")+"，请检查网络或稍后重试。"); }
+            catch(WebException ex) { int status=0;using(var response=ex.Response) {if(response is HttpWebResponse)status=(int)((HttpWebResponse)response).StatusCode;}lifetime.Check();throw new InvalidOperationException("网页翻译请求失败"+(status>0?"（HTTP "+status+"）":"")+"。"+NetworkProxy.FailureHint(ex,status)); }
             catch(JsonException) {throw new InvalidOperationException("网页翻译返回格式不正确，接口可能已变化。");}
             catch(IOException) {lifetime.Check();throw new InvalidOperationException("网页翻译连接中断，请重试。");}
         }

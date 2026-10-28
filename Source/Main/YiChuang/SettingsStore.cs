@@ -96,6 +96,7 @@ namespace YiChuang
             var parsed=JObject.Parse(json);
             if(parsed["Master_switch"]==null||parsed["Translation_interface"]==null||parsed.Properties().Any(p=>p.Value is JContainer))throw new InvalidDataException("这不是完整的译窗配置备份。");
             EngineRegistry.ValidateImport((string)parsed["EngineRegistry"]);
+            NetworkProxy.Parse(parsed).Validate();
             if(parsed["LocalBackend"]!=null&&(string)parsed["LocalBackend"]!="ollama"&&(string)parsed["LocalBackend"]!="llamacpp")throw new InvalidDataException("备份中的本地模型运行方式无效。");
             foreach(string name in new[]{"translationFontSize","originalFontSize"})if(parsed[name]!=null) {
                 float value;

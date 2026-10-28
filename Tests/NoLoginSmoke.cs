@@ -69,7 +69,7 @@ class NoLoginSmoke
                 using(Form settings=(Form)Activator.CreateInstance(assembly.GetType("YiChuang.Frmsetting"))) {
                     settings.Opacity=0;settings.Show();Application.DoEvents();
                     var tree=(FlowLayoutPanel)settings.Controls.Find("SettingsNavigation",true)[0];
-                    Assert(tree.Controls.Count==5,"Settings navigation missing");
+                    Assert(tree.Controls.Count==6,"Settings navigation missing");
                     foreach(string title in (string[])settings.GetType().GetProperty("SettingsPageTitles").GetValue(settings,null)) {
                         Console.WriteLine("Settings page: "+title);
                         Assert(!title.Contains("登录"),"Login settings entry present");

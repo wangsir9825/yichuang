@@ -30,7 +30,7 @@ namespace YiChuang
             key.TextChanged += (s,e) => ClassMain.Deeplkey_official = key.Text.Trim();
             AddField(grid,"API Key","ApiKeyLabel",key,2);
             var note = new Label {AutoSize=true, MaximumSize=new Size(510,0), Margin=new Padding(0,18,0,0),
-                Text="在 DeepL 网页点击 Copy key，粘贴完整密钥。\r\n末尾为 :fx 的密钥选择 API Free / Developer。\r\n翻译方向统一在主界面原文区上方选择。\r\n点击下方“保存并返回”保存参数。"};
+                Text="在 DeepL 网页点击 Copy key，粘贴完整密钥。\r\n末尾为 :fx 的密钥选择 API Free / Developer。\r\n翻译方向统一在主界面原文区上方选择。\r\n点击“保存”返回列表，或点击“应用”继续编辑。"};
             grid.Controls.Add(note,0,3); grid.SetColumnSpan(note,2);
             Controls.Add(grid);
         }

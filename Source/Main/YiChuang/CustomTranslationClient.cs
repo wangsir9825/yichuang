@@ -35,11 +35,10 @@ namespace YiChuang
         private static JObject Post(string url,EngineDefinition e,JObject payload,Func<bool> current)
         {
             ServicePointManager.SecurityProtocol|=SecurityProtocolType.Tls12;
-            var request=(HttpWebRequest)WebRequest.Create(url);
+            var request=NetworkProxy.Create(url);
             request.Method="POST";request.ContentType="application/json; charset=utf-8";request.Accept="application/json";
             request.AllowAutoRedirect=false;request.Timeout=e.TimeoutSeconds*1000;request.ReadWriteTimeout=request.Timeout;
             request.ServicePoint.Expect100Continue=false;
-            if(new Uri(url).IsLoopback)request.Proxy=null;
             if(!string.IsNullOrEmpty(e.ApiKey))request.Headers["Authorization"]="Bearer "+e.ApiKey;
             byte[] bytes=Encoding.UTF8.GetBytes(payload.ToString(Formatting.None));request.ContentLength=bytes.Length;
             DateTime deadline=DateTime.UtcNow.AddMilliseconds(request.Timeout);
@@ -56,9 +55,9 @@ namespace YiChuang
             } catch(WebException ex) {
                 if(!current())throw new OperationCanceledException();
                 var response=ex.Response as HttpWebResponse;
-                if(response!=null){int status=(int)response.StatusCode;response.Dispose();string hint=status==401||status==403?"请检查完整密钥和访问权限。":status==429?"请求频繁或额度不足。":status==404?"请检查基础地址和模型名称。":"请检查接口参数或稍后重试。";throw new InvalidOperationException("请求失败（HTTP "+status+"）。"+hint);}
+                if(response!=null){int status=(int)response.StatusCode;response.Dispose();string hint=status==407?NetworkProxy.FailureHint(ex,status):status==401||status==403?"请检查完整密钥和访问权限。":status==429?"请求频繁或额度不足。":status==404?"请检查基础地址和模型名称。":"请检查接口参数或稍后重试。";throw new InvalidOperationException("请求失败（HTTP "+status+"）。"+hint);}
                 if(DateTime.UtcNow>=deadline||ex.Status==WebExceptionStatus.Timeout)throw new InvalidOperationException("请求超时，可缩短原文或在引擎管理中调整超时。");
-                throw new InvalidOperationException("无法连接该引擎，请检查服务、地址、网络和代理。");
+                throw new InvalidOperationException("无法连接该引擎。"+NetworkProxy.FailureHint(ex));
             } catch(JsonException){throw new InvalidOperationException("接口返回格式不正确；需要兼容 Chat Completions 的 JSON 响应。");}
             catch(IOException){if(!current())throw new OperationCanceledException();throw new InvalidOperationException("连接中断或请求超时，请稍后重试。");}
         }

@@ -39,10 +39,9 @@ namespace YiChuang
 			((global::_9C0D35A9)_63AF42A1._71AC5D16[761])();
 			((global::FA181004)_63AF42A1._71AC5D16[537])(A72B0D1D: false);
 			try { SettingsStore.ImportPreviousSettings(); } catch(Exception ex) { RebuildInfo.Log(ex); }
-			bool firstRun=!System.IO.File.Exists(System.IO.Path.Combine(SettingsStore.Folder,"setting.txt"))&&!LocalRuntime.Load().WizardCompleted;
 			Form2 form = new Form2();
 			if(RebuildInfo.DiagnosticOutput==null)form.Shown+=async(s,e)=>{
-                if(firstRun||Array.IndexOf(args,"--setup")>=0){using(var wizard=new LocalSetupWizard())wizard.ShowDialog(form);form.RefreshAfterSetup();}
+                if(Array.IndexOf(args,"--setup")>=0){using(var wizard=new LocalSetupWizard())wizard.ShowDialog(form);form.RefreshAfterSetup();}
                 else if(EngineRegistry.Get(ClassMain.isjiekounum)?.Provider=="ollama") {
                     using(var cancel=new CancellationTokenSource()) {
                         System.Windows.Forms.FormClosedEventHandler closed=(sender,eventArgs)=>cancel.Cancel();form.FormClosed+=closed;

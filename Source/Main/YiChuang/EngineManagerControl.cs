@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -25,6 +26,9 @@ namespace YiChuang
 
     public sealed class EngineManagerControl : UserControl
     {
+        internal Action Changed;
+        internal Func<bool> BeforeOpenSetup;
+        internal Action<bool> SetupClosed;
         private readonly EngineCheckList list = new EngineCheckList();
         private bool refreshing;
         private readonly Label details = new Label();
@@ -38,8 +42,8 @@ namespace YiChuang
             var title=new Label{Text=localOnly?"我的本地模型":"我的翻译引擎",Font=new Font("Microsoft YaHei UI",12,FontStyle.Bold),AutoSize=true,Location=new Point(0,0)};
             Controls.Add(title);
             var setup=new Button{Name="OpenLocalSetup",Text="本地模型配置向导",Location=new Point(390,0),Size=new Size(210,30),FlatStyle=FlatStyle.Flat,ForeColor=UiTheme.Accent};
-            setup.Click+=(s,e)=>{using(var wizard=new LocalSetupWizard())wizard.ShowDialog(FindForm());RefreshList(ClassMain.isjiekounum);};if(!localOnly)Controls.Add(setup);else setup.Dispose();
-            Controls.Add(new Label{Text=localOnly?"不限于两款预设。添加 GGUF 或 Ollama 模型；勾选后在主界面显示。":"勾选后在主界面显示；取消勾选保留配置。选中一项可上移、下移。",Location=new Point(0,34),Size=new Size(600,28)});
+            setup.Click+=(s,e)=>{if(BeforeOpenSetup!=null&&!BeforeOpenSetup())return;string saved=Path.Combine(SettingsStore.Folder,"setting.txt");var before=File.GetLastWriteTimeUtc(saved);using(var wizard=new LocalSetupWizard())wizard.ShowDialog(FindForm());RefreshList(ClassMain.isjiekounum);SetupClosed?.Invoke(File.GetLastWriteTimeUtc(saved)!=before);};if(!localOnly)Controls.Add(setup);else setup.Dispose();
+            Controls.Add(new Label{Text=localOnly?"自行添加 GGUF 或 Ollama 模型；勾选后在主界面显示。":"勾选后在主界面显示；取消勾选保留配置。选中一项可上移、下移。",Location=new Point(0,34),Size=new Size(600,28)});
             list.Name="ManagedEngines";list.Location=new Point(0,68);list.Size=new Size(600,224);list.IntegralHeight=false;list.HorizontalScrollbar=true;list.BorderStyle=BorderStyle.FixedSingle;
             Controls.Add(list);
             list.CheckOnClick=true;
@@ -50,8 +54,8 @@ namespace YiChuang
                 if(IsHandleCreated)BeginInvoke(new Action(()=>{if(!IsDisposed)RefreshList(selected);}));
             };
             var actions=new FlowLayoutPanel{Location=new Point(0,305),Size=new Size(610,42),WrapContents=false};
-            var add=ActionButton("AddEngine","新增引擎");edit=ActionButton("EditEngine","编辑配置");remove=ActionButton("RemoveEngine","移除引擎");restore=ActionButton("RestoreEngine","恢复内置 ▾");up=ActionButton("MoveEngineUp","↑ 上移");down=ActionButton("MoveEngineDown","↓ 下移");
-            if(localOnly){add.Text="添加模型";edit.Text="编辑模型";remove.Text="移除模型";restore.Text="恢复预设 ▾";}
+            var add=ActionButton("AddEngine","新增引擎");edit=ActionButton("EditEngine","编辑配置");remove=ActionButton("RemoveEngine","移除引擎");restore=ActionButton("RestoreEngine","恢复内置");up=ActionButton("MoveEngineUp","↑ 上移");down=ActionButton("MoveEngineDown","↓ 下移");
+            if(localOnly){add.Text="添加模型";edit.Text="编辑模型";remove.Text="移除模型";restore.Visible=false;}
             actions.Controls.AddRange(new Control[]{add,edit,remove,restore,up,down});Controls.Add(actions);
             details.Name="EngineManagerHint";details.Location=new Point(0,358);details.Size=new Size(600,68);details.ForeColor=UiTheme.Muted;Controls.Add(details);
             list.SelectedIndexChanged+=(s,e)=>RefreshDetails();
@@ -75,25 +79,25 @@ namespace YiChuang
         }
         private static Button ActionButton(string name,string text)
         {
-            return new Button{Name=name,Text=text,Width=92,Height=36,Margin=new Padding(0,0,8,0),FlatStyle=FlatStyle.Flat,BackColor=UiTheme.Tint};
+            return new Button{Name=name,Text=text,TextAlign=ContentAlignment.MiddleCenter,Width=92,Height=36,Margin=new Padding(0,0,8,0),FlatStyle=FlatStyle.Flat,BackColor=UiTheme.Tint};
         }
         public int SelectedEngineId {get{return (list.SelectedItem as EngineDefinition)?.Id??ClassMain.isjiekounum;}}
         public void RefreshList(int selected)
         {
             refreshing=true;list.BeginUpdate();list.Items.Clear();foreach(int id in EngineRegistry.ActiveIds){var entry=EngineRegistry.Get(id);if(!localOnly||IsLocal(entry))list.Items.Add(entry,EngineRegistry.IsVisible(id));}
             list.SelectedIndex=-1;for(int i=0;i<list.Items.Count;i++)if(((EngineDefinition)list.Items[i]).Id==selected)list.SelectedIndex=i;
-            if(list.SelectedIndex<0&&list.Items.Count>0)list.SelectedIndex=0;list.EndUpdate();refreshing=false;RefreshDetails();
+            if(list.SelectedIndex<0&&list.Items.Count>0)list.SelectedIndex=0;list.EndUpdate();refreshing=false;RefreshDetails();Changed?.Invoke();
         }
         private void RefreshDetails()
         {
             var e=list.SelectedItem as EngineDefinition;edit.Enabled=e!=null&&e.Provider!="transmart"&&e.Provider!="sogou";remove.Enabled=e!=null;
             restore.Enabled=RestorableIds().Any();
             up.Enabled=list.SelectedIndex>0;down.Enabled=list.SelectedIndex>=0&&list.SelectedIndex<list.Items.Count-1;
-            details.Text=EngineRegistry.LoadError??(e==null?(localOnly?"还没有本地模型。点击‘添加模型’选择已有文件，或到‘推荐模型与运行设置’准备预设。":"列表为空。点击‘新增引擎’或‘恢复内置’，然后在主界面选择。"):
-                ((e.Provider=="ollama"||e.Provider=="llamacpp")?"本地模型："+e.Model:"接口类型："+EngineEditorForm.ProviderLabel(e.Provider))+"\r\n"+(e.Provider=="transmart"||e.Provider=="sogou"?"此网页引擎没有可填写的参数。":"选择‘编辑配置’可调整参数。")+" 点击下方‘保存并关闭’保存更改。");
+            details.Text=EngineRegistry.LoadError??(e==null?(localOnly?"还没有本地模型。点击‘添加模型’选择 GGUF 文件，或填写 Ollama 中已安装的模型名称。":"列表为空。点击‘新增引擎’或‘恢复内置’，然后在主界面选择。"):
+                ((e.Provider=="ollama"||e.Provider=="llamacpp")?"本地模型："+e.Model:"接口类型："+EngineEditorForm.ProviderLabel(e.Provider))+"\r\n"+(e.Provider=="transmart"||e.Provider=="sogou"?"此网页引擎没有可填写的参数。":"选择‘编辑配置’可调整参数。")+(localOnly?" 点击下方‘保存并关闭’保存更改。":" 点击下方‘保存’或‘应用’保存更改。"));
         }
         private static bool IsLocal(EngineDefinition e){return e!=null&&(e.Provider=="ollama"||e.Provider=="llamacpp");}
-        private System.Collections.Generic.IEnumerable<int> RestorableIds(){return EngineRegistry.BuiltinIds.Where(id=>(!localOnly||id==16||id==17)&&EngineRegistry.Get(id)==null);}
+        private System.Collections.Generic.IEnumerable<int> RestorableIds(){return EngineRegistry.BuiltinIds.Where(id=>!localOnly&&EngineRegistry.Get(id)==null);}
         private void MoveSelected(int offset){var e=list.SelectedItem as EngineDefinition;if(e==null)return;if(localOnly){int to=list.SelectedIndex+offset;if(to<0||to>=list.Items.Count)return;int other=((EngineDefinition)list.Items[to]).Id;var ids=EngineRegistry.ActiveIds;offset=Array.IndexOf(ids,other)-Array.IndexOf(ids,e.Id);}EngineRegistry.Move(e.Id,offset);RefreshList(e.Id);}
         private void EditSelected()
         {
@@ -171,7 +175,7 @@ namespace YiChuang
             ShowField(endpoint,!embedded);fetch.Text=embedded?"选择 GGUF 文件":"读取已安装模型";ShowField(apiKey,!local);ShowField(model,!deepL);ShowField(fetch,local);ShowField(prompt,local);
             fields.GetControlFromPosition(0,fields.GetPositionFromControl(model).Row).Text=embedded?"GGUF 文件路径":"模型名称";
             fields.GetControlFromPosition(0,fields.GetPositionFromControl(fetch).Row).Text=embedded?"选择模型文件":"本地模型列表";
-            hint.Text=embedded?"选择本机 GGUF 文件；无需服务地址或 API Key。Hy-MT2 / TranslateGemma 选择对应模板；其他模型需有可用聊天模板。旧版 Ollama Google 权重请先在配置向导中转换。新增/移除条目不删除模型文件。":local?"选择已下载的 Ollama 模型。新增或移除配置不会下载、删除模型文件。Hy-MT2 / TranslateGemma 请选择对应提示模板。":
+            hint.Text=embedded?"选择本机 GGUF 文件；无需服务地址或 API Key。Hy-MT2 / TranslateGemma 选择对应模板；其他模型需有可用聊天模板。请选择与 llama.cpp 兼容的 GGUF 文本模型。新增/移除条目不删除模型文件。":local?"选择已下载的 Ollama 模型。新增或移除配置不会下载、删除模型文件。Hy-MT2 / TranslateGemma 请选择对应提示模板。":
                 p=="openai"?"填写服务商提供的 API 基础地址（通常以 /v1 结尾），不要追加 /chat/completions。需要支持 Chat Completions；本机免密钥服务可留空 Key。":
                 deepL?"Free 接口：https://api-free.deepl.com；Pro 接口：https://api.deepl.com。翻译方向统一在主界面原文区上方选择。":
                 p=="qwen"?"填写与百炼地域匹配的 API Key、兼容模式地址和 Qwen-MT 模型名。普通 Qwen 对话模型请选择 OpenAI 兼容接口。":"填写 Google API Key 和文本模型名。模型名称不要包含 models/ 前缀。";

@@ -8,3 +8,17 @@ Backups/
 .env*
 Tests/*.exe
 Tests/*.pdb
+
+Release/
+Article/
+Design/
+STATUS.md
+USER_RESOURCES.md
+*.log
+*.pdb
+__pycache__/
+*.exe
+*.dll
+*.zip
+*.gguf
+*.safetensors

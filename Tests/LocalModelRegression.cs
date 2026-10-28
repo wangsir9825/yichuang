@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
@@ -27,9 +27,9 @@ class LocalModelRegression
     public static string Folder(Environment.SpecialFolder folder) { return Data; }
     static object Member(object instance,string name) { return instance.GetType().GetField(name,BindingFlags.Instance|BindingFlags.NonPublic).GetValue(instance); }
     static void Set(Type type,string name,object value) { type.GetField(name).SetValue(null,value); }
-    static void Wait(Func<bool> condition)
+    static void Wait(Func<bool> condition,int seconds=8)
     {
-        DateTime until = DateTime.UtcNow.AddSeconds(8);
+        DateTime until = DateTime.UtcNow.AddSeconds(seconds);
         while (!condition() && DateTime.UtcNow < until) { Application.DoEvents(); Thread.Sleep(15); }
         Assert(condition(),"UI operation timed out");
     }
@@ -78,6 +78,7 @@ class LocalModelRegression
                 if(fault=="500" && path=="/api/chat") {httpStatus="500 Internal Server Error";response="{\"error\":\"GPU memory unavailable\"}";}
                 if(fault=="invalid" && path=="/api/chat") response="broken json";
                 if(fault=="delay" && path=="/api/chat") Thread.Sleep(2000);
+                if(fault=="timeout" && path=="/api/chat") Thread.Sleep(12000);
                 byte[] bytes=Encoding.UTF8.GetBytes(response);
                 byte[] header=Encoding.ASCII.GetBytes("HTTP/1.1 "+httpStatus+"\r\nContent-Type: application/json\r\nContent-Length: "+bytes.Length+"\r\nConnection: close\r\n\r\n");
                 stream.Write(header,0,header.Length);stream.Write(bytes,0,bytes.Length);
@@ -109,33 +110,39 @@ class LocalModelRegression
             log.Add("Remote endpoint rejected before any HTTP request: passed");
             Application.EnableVisualStyles();
             var form=(Form)Activator.CreateInstance(app.GetType("YiChuang.Form2"));form.Opacity=0;form.Show();Application.DoEvents();
-            foreach(int engineId in new[]{4,5,6,14,16,17,18,19})app.GetType("YiChuang.EngineRegistry").GetMethod("SetVisible").Invoke(null,new object[]{engineId,true});
+            var registry=app.GetType("YiChuang.EngineRegistry");
+            var definition=app.GetType("YiChuang.EngineDefinition");
+            int[] localIds=new int[2];
+            for(int i=0;i<2;i++){
+                var model=Activator.CreateInstance(definition);
+                definition.GetField("Name").SetValue(model,i==0?"User Hy":"User Gemma");
+                definition.GetField("Provider").SetValue(model,"ollama");
+                definition.GetField("Endpoint").SetValue(model,"http://127.0.0.1:"+Port);
+                definition.GetField("Model").SetValue(model,i==0?"yichuang-hy-mt2:7b-q6":"translategemma:12b");
+                definition.GetField("Prompt").SetValue(model,i==0?"hy":"gemma");
+                localIds[i]=(int)registry.GetMethod("Save").Invoke(null,new[]{model});
+            }
             form.GetType().GetMethod("RebuildEngineMenu",BindingFlags.Instance|BindingFlags.NonPublic).Invoke(form,null);
 
             Set(main,"is单词悬浮框",true);
-            form.GetType().GetMethod("SelectLocalEngine",BindingFlags.NonPublic|BindingFlags.Instance).Invoke(form,new object[]{16});
+            form.GetType().GetMethod("SelectLocalEngine",BindingFlags.NonPublic|BindingFlags.Instance).Invoke(form,new object[]{localIds[0]});
             var source=(RichTextBox)Member(form,"rtb原文");var target=(RichTextBox)Member(form,"rtb译文");
             form.GetType().GetMethod("xianshiyuanwen",BindingFlags.NonPublic|BindingFlags.Instance).Invoke(form,new object[]{"hello"});
-            Wait(()=>target.Text.Contains("腾讯译文：hello"));
+            Wait(()=>target.Text.Contains("腾讯译文：hello"));Assert(((ToolStripStatusLabel)Member(form,"modernStatus")).Text.StartsWith("翻译耗时："),"Local success timing absent");
             log.Add("Captured single word bypasses online floating dictionary and uses local Hy-MT2: passed");
             source.Text="slow";Wait(()=>{lock(Chats)return Chats.Exists(c=>Json.Serialize(c).Contains("slow"));});source.Text="fresh";
             Wait(()=>target.Text.Contains("腾讯译文：fresh"));
             log.Add("A newer source text replaces an in-flight result without stale text overwriting it: passed");
-            form.GetType().GetMethod("SelectLocalEngine",BindingFlags.NonPublic|BindingFlags.Instance).Invoke(form,new object[]{17});
+            form.GetType().GetMethod("SelectLocalEngine",BindingFlags.NonPublic|BindingFlags.Instance).Invoke(form,new object[]{localIds[1]});
             Wait(()=>target.Text.Contains("Google译文：fresh"));
             Assert(Unloads>=2,"Models were not unloaded when switching");
             log.Add("Engine switch uses TranslateGemma and unloads the other translation model: passed");
-            var settings=(Form)Activator.CreateInstance(app.GetType("YiChuang.Frmsetting"));settings.Opacity=0;settings.Show(form);
-            settings.GetType().GetMethod("ShowPage").Invoke(settings,new object[]{"内置本地模型"});settings.Close();
-            string configPath=(string)local.GetProperty("SettingsPath").GetValue(null,null);
-            Assert(configPath.StartsWith(Data)&&File.Exists(configPath),"Local settings were not saved to isolated storage");
-            var saved=Json.Deserialize<Dictionary<string,object>>(File.ReadAllText(configPath));
-            Assert(saved["hunyuan_model"].ToString()=="yichuang-hy-mt2:7b-q6","Local model name did not persist");
+            main.GetMethod("jiluset").Invoke(null,null);
             var savedMain=Json.Deserialize<Dictionary<string,object>>((string)main.GetMethod("readJiekou").Invoke(null,null));
-            Assert(savedMain["Translation_interface"].ToString()=="17","Selected local engine was reset on save");
+            Assert(savedMain["Translation_interface"].ToString()==localIds[1].ToString(),"Selected local engine was reset on save");
             log.Add("Local settings and selected engine survive encrypted main-config save/read: passed");
             string unusual="第一行\nSecond line: C:\\temp\\file \"quoted\"";
-            client.GetMethod("Translate").Invoke(null,new object[]{16,unusual,"en-zh",null});
+            client.GetMethod("Translate").Invoke(null,new object[]{localIds[0],unusual,"en-zh",null});
             Dictionary<string,object> last;lock(Chats)last=Chats[Chats.Count-1];
             string sent=((Dictionary<string,object>)((System.Collections.IList)last["messages"])[0])["content"].ToString();
             Assert(sent.EndsWith(unusual),"Unicode/newline/quote JSON did not round-trip");
@@ -149,16 +156,17 @@ class LocalModelRegression
             Fault=""; ((ToolStripButton)Member(form,"localRetryButton")).PerformClick();Wait(()=>target.Text.Contains("Google译文：server failure test"));
             log.Add("HTTP 500 appears in UI, retry of identical source succeeds: passed");
             Fault="invalid"; source.Text="invalid response test";Wait(()=>target.Text.Contains("无法识别的数据"));
+            Assert(((ToolStripStatusLabel)Member(form,"modernStatus")).Text.StartsWith("失败 · 耗时"),"Failure reported as success timing");
             log.Add("Malformed response has a readable UI error: passed");
-            client.GetField("TranslationTimeoutMs",BindingFlags.Static|BindingFlags.NonPublic).SetValue(null,200);
-            Fault="delay"; source.Text="timeout test";Wait(()=>target.Text.Contains("超时"));
-            client.GetField("TranslationTimeoutMs",BindingFlags.Static|BindingFlags.NonPublic).SetValue(null,180000);
+            var timedModel=registry.GetMethod("Get").Invoke(null,new object[]{localIds[1]});definition.GetField("TimeoutSeconds").SetValue(timedModel,10);registry.GetMethod("Save").Invoke(null,new[]{timedModel});
+            Fault="timeout"; source.Text="timeout test";Wait(()=>target.Text.Contains("超时"),15);
+            definition.GetField("TimeoutSeconds").SetValue(timedModel,180);registry.GetMethod("Save").Invoke(null,new[]{timedModel});
             Fault=""; Thread.Sleep(2100);
             int before; lock(Chats)before=Chats.Count;
             Fault="delay";source.Text="cancel active test";Wait(()=>{lock(Chats)return Chats.Count>before;});
             var cancelWatch=System.Diagnostics.Stopwatch.StartNew();((ToolStripButton)Member(form,"localCancelButton")).PerformClick();
             Wait(()=>target.Text.Contains("已取消"));Assert(cancelWatch.ElapsedMilliseconds<1000,"Cancel blocked UI");
-            Thread.Sleep(2100);Application.DoEvents();Assert(target.Text.Contains("已取消"),"Cancelled result overwrote UI");
+            Thread.Sleep(2100);Application.DoEvents();Assert(target.Text.Contains("已取消"),"Cancelled result overwrote UI");Assert(((ToolStripStatusLabel)Member(form,"modernStatus")).Text.StartsWith("已取消 · 耗时"),"Canceled timing overwritten by stale result");
             Fault=""; ((ToolStripButton)Member(form,"localRetryButton")).PerformClick();Wait(()=>target.Text.Contains("Google译文：cancel active test"));
             log.Add("Timeout, active cancellation, stale suppression and recovery: passed");
             listener.Stop();source.Text="service offline test";

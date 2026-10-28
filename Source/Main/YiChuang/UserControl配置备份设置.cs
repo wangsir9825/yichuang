@@ -8,6 +8,7 @@ namespace YiChuang
 {
 	public class UserControl配置备份设置 : UserControl
 	{
+        internal Action<bool> ConfigurationCommitted;
 		private IContainer components = null;
 
 		private GroupBox groupBox2;
@@ -51,7 +52,9 @@ namespace YiChuang
 		{
 			if (((global::_329CCB02)_63AF42A1._71AC5D16[296])("您确定要导出备份数据吗？", "提示", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
 			{
+                string saved=Path.Combine(SettingsStore.Folder,"setting.txt");var before=File.GetLastWriteTimeUtc(saved);
 				ClassMain.Export_Backup();
+                if(File.GetLastWriteTimeUtc(saved)!=before){txtPath.Text=ClassMain.Backup_Path;ConfigurationCommitted?.Invoke(false);}
 			}
 		}
 
@@ -87,7 +90,8 @@ namespace YiChuang
                     // Validate and persist before changing live configuration.
                     SettingsStore.ImportBackup(text);
                     ClassMain.read_setSetting(text);
-                    MessageBox.Show(FindForm(),"导入成功。关闭设置后生效。","配置备份",MessageBoxButtons.OK,MessageBoxIcon.Information);
+                    txtPath.Text=ClassMain.Backup_Path;ConfigurationCommitted?.Invoke(true);
+                    MessageBox.Show(FindForm(),"导入成功，配置已保存。","配置备份",MessageBoxButtons.OK,MessageBoxIcon.Information);
                 }
 			}
 			catch (Exception)

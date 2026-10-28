@@ -15,7 +15,7 @@ namespace YiChuang
             table.Controls.Add(new Label {Text="模型名称",AutoSize=true,Margin=new Padding(3,8,16,8)},0,1);table.Controls.Add(txtModel,1,1);
             txtKey.Text=ClassMain.DeepSeekAI_key;txtModel.Text=ClassMain.DeepSeekAI_model;
             txtKey.TextChanged+=(s,e)=>ClassMain.DeepSeekAI_key=txtKey.Text.Trim();txtModel.TextChanged+=(s,e)=>ClassMain.DeepSeekAI_model=txtModel.Text.Trim();
-            var note=new Label {AutoSize=true,Margin=new Padding(3,20,3,8),Text="填写个人 API Key 和模型名称后，点击下方“保存并返回”。"};table.Controls.Add(note,0,2);table.SetColumnSpan(note,2);
+            var note=new Label {AutoSize=true,Margin=new Padding(3,20,3,8),Text="填写个人 API Key 和模型名称后，点击“保存”返回列表，或点击“应用”继续编辑。"};table.Controls.Add(note,0,2);table.SetColumnSpan(note,2);
         }
     }
 }

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
@@ -15,7 +15,10 @@ namespace YiChuang
         internal static readonly Color Selected=Color.FromArgb(164,210,198), Hover=Color.FromArgb(216,235,228), Frame=Color.FromArgb(128,159,152);
         internal static void StyleSettings(Control control) {
             control.ForeColor=Ink;
-            if(control is Button){var b=(Button)control;b.FlatStyle=FlatStyle.Flat;b.FlatAppearance.BorderColor=Line;b.BackColor=Color.White;b.Padding=new Padding(7,3,7,3);}
+            // The short settings actions have a 30px design height. At 96 DPI,
+            // vertical padding plus WinForms' text inset needs 37px and clips them.
+            // Keep compact controls centered with enough height before DPI scaling.
+            if(control is Button){var b=(Button)control;b.FlatStyle=FlatStyle.Flat;b.FlatAppearance.BorderColor=Line;b.BackColor=Color.White;b.Padding=new Padding(7,0,7,0);b.Height=Math.Max(32,b.Height);}
             else if(control is TextBoxBase || control is ComboBox || control is UserControl || control is GroupBox || control is TableLayoutPanel || control is FlowLayoutPanel)control.BackColor=Color.White;
             foreach(Control child in control.Controls)StyleSettings(child);
             if(control.Name=="FontSample")control.BackColor=Background;
@@ -72,6 +75,7 @@ namespace YiChuang
                     case "exit":line(10,4,4,4);line(4,4,4,20);line(4,20,10,20);line(9,12,21,12);line(17,8,21,12);line(17,16,21,12);break;
                     case "power":g.DrawArc(pen,4,4,16,16,-55,290);line(12,2,12,11);break;
                     case "select":g.DrawPolygon(pen,new[]{new Point(5,3),new Point(6,19),new Point(10,15),new Point(14,21),new Point(17,19),new Point(13,13),new Point(20,12)});break;
+                    case "network":g.DrawEllipse(pen,3,3,18,18);g.DrawEllipse(pen,8,3,8,18);line(3,12,21,12);line(5,7,19,7);line(5,17,19,17);break;
                     case "keyboard":g.DrawRectangle(pen,2,5,20,14);for(int y=9;y<15;y+=4)for(int x=6;x<20;x+=4)line(x,y,x+.4f,y);line(8,16,16,16);break;
                     case "mouse":g.DrawEllipse(pen,6,2,12,20);line(12,2,12,10);line(6,10,18,10);break;
                     case "cancel":g.DrawRectangle(pen,6,6,12,12);break;

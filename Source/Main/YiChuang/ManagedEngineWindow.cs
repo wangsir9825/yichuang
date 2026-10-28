@@ -28,6 +28,7 @@ namespace YiChuang
         private void SelectManagedEngine(int engine)
         {
             if(!NoLoginBuild.IsAllowedEngine(engine))return;
+            ResetTranslationTiming();
             bool changed=ClassMain.isjiekounum!=engine;ClassMain.isjiekounum=engine;
             Interlocked.Increment(ref localRevision);localCancelButton.Enabled=false;sentenceHover?.Reset();
             foreach(ToolStripItem item in toolStripDropDownButton1.DropDownItems){var menu=item as ToolStripMenuItem;if(menu!=null)menu.Checked=menu.Tag is int&&(int)menu.Tag==engine;}
@@ -42,14 +43,15 @@ namespace YiChuang
             int revision=Interlocked.Increment(ref localRevision);var configured=TranslationDirection.Snapshot(EngineRegistry.Get(engine),text);
             localCancelButton.Enabled=configured!=null&&!string.IsNullOrWhiteSpace(text);
             if(configured==null){ShowTranslationStatus("该引擎已被移除，请重新选择。");return;}
-            if(string.IsNullOrWhiteSpace(text)){YiStr("");return;}
+            if(string.IsNullOrWhiteSpace(text)){ResetTranslationTiming();YiStr("");return;}
+            BeginTranslationTiming(revision);
             ShowTranslationStatus(configured.Name+" 正在翻译…");
             translationScheduler.Schedule(()=>{
                 Func<bool> current=()=>revision==Volatile.Read(ref localRevision)&&ClassMain.isjiekounum==engine&&!IsDisposed;
                 if(!current())return;
                 try{PublishLocalTranslation(CustomTranslationClient.Translate(configured,text,current),revision,engine);}
                 catch(OperationCanceledException){}
-                catch(Exception ex){PublishLocalTranslation("翻译失败："+ex.Message,revision,engine);}
+                catch(Exception ex){PublishLocalTranslation("翻译失败："+ex.Message,revision,engine,true,false);}
             });
         }
         private void SetTranslationDirection(string mode)

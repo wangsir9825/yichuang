@@ -117,6 +117,7 @@ namespace YiChuang
 				string text9 = ((global::F5871009)_63AF42A1._71AC5D16[274])(((global::E3051AA0)_63AF42A1._71AC5D16[794])(((global::D88C550C)_63AF42A1._71AC5D16[531])(HmacSHA256(key, content)), "-", ""));
 				Uri _55BEEC3E = B31298BD.E19625B3(C3A60D32.F8BD5BAC("{0}://{1}{2}?{3}", new object[4] { schema, host, path, stringBuilder }));
 				HttpWebRequest httpWebRequest = (HttpWebRequest)((global::CB8B3B9C)_63AF42A1._71AC5D16[315])(_55BEEC3E);
+                NetworkProxy.Apply(httpWebRequest);
 				((global::_2798B585)_63AF42A1._71AC5D16[99])(httpWebRequest, method);
 				((global::_5AB7C29C)_63AF42A1._71AC5D16[345])(httpWebRequest, host);
 				((global::E9BD31B0)_63AF42A1._71AC5D16[514])(httpWebRequest, text4);

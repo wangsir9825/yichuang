@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -86,13 +86,12 @@ class LocalSetupRegression
                 var done=(Button)Field(wizard,"done");Check(done.Visible&&done.Parent.ClientRectangle.Contains(done.Bounds),"Wizard footer clipped");
                 Control.CheckForIllegalCrossThreadCalls=true;SynchronizationContext.SetSynchronizationContext(null);
                 var detect=(Button)Field(wizard,"detect");detect.PerformClick();PumpUntil(()=>detect.Enabled);Check((bool)Field(wizard,"serviceReady"),"Wizard detection failed");
-                ((CheckBox)Field(wizard,"gemma")).Checked=true;var download=(Button)Field(wizard,"download");download.PerformClick();PumpUntil(()=>download.Enabled);
-                Check(server.Models.Contains("translategemma:12b")&&done.Text.Contains("开始翻译"),"Wizard did not prepare/save selected model");
+                Check(!wizard.Controls.Find("PrepareHy",true).Any()&&!wizard.Controls.Find("PrepareGemma",true).Any(),"Ollama setup still recommends presets");
                 using(var bitmap=new System.Drawing.Bitmap(wizard.Width,wizard.Height)){wizard.DrawToBitmap(bitmap,new System.Drawing.Rectangle(0,0,wizard.Width,wizard.Height));bitmap.Save(Path.Combine(output,"wizard.png"));}
                 done.PerformClick();Check(wizard.IsDisposed,"Wizard completion did not close");
                 for(int i=0;i<25;i++){Application.DoEvents();Thread.Sleep(5);}
             }
-            Log.Add("Actual wizard controls: visible footer, async service check, selected model preparation and settings saved in isolated profile, finish/close: passed.");
+            Log.Add("Actual wizard controls: visible footer, async service check, actual model list and service settings saved in isolated profile, finish/close: passed.");
             File.WriteAllLines(Path.Combine(output,"result.txt"),Log);Console.WriteLine("Local setup regression passed.");return 0;
         }catch(Exception ex){Log.Add(ex.GetType().FullName+": "+ex.Message);File.WriteAllLines(Path.Combine(output,"result.txt"),Log);Console.Error.WriteLine(ex.GetType().FullName+": "+ex.Message);return 1;}
     }

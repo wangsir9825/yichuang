@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -16,7 +16,7 @@ namespace YiChuang
     internal sealed class LocalRuntimeOptions
     {
         public string Executable = "", ModelsDirectory = "";
-        public string GgufDirectory = "", HyGguf = "", GemmaGguf = "", Acceleration = "auto";
+        public string GgufDirectory = "", HyGguf = "", GemmaGguf = "", Acceleration = "cpu";
         public bool WizardCompleted;
     }
 
@@ -26,7 +26,7 @@ namespace YiChuang
         internal static string OptionsPath { get { return Path.Combine(SettingsStore.Folder,"local-runtime.json"); } }
         internal static LocalRuntimeOptions Load()
         {
-            try { return JsonConvert.DeserializeObject<LocalRuntimeOptions>(File.ReadAllText(OptionsPath)) ?? new LocalRuntimeOptions(); }
+            try { var options=JsonConvert.DeserializeObject<LocalRuntimeOptions>(File.ReadAllText(OptionsPath)) ?? new LocalRuntimeOptions(); options.Acceleration=options.Acceleration=="auto"?"auto":"cpu"; return options; }
             catch { return new LocalRuntimeOptions(); }
         }
         internal static void Save(LocalRuntimeOptions options)
@@ -155,7 +155,7 @@ namespace YiChuang
         {
             string dir=Path.Combine(SettingsStore.Folder,"Downloads");Directory.CreateDirectory(dir);
             string file=Path.Combine(dir,"OllamaSetup-"+Guid.NewGuid().ToString("N")+".exe");
-            var request=(HttpWebRequest)WebRequest.Create("https://ollama.com/download/OllamaSetup.exe");request.Timeout=30000;request.ReadWriteTimeout=60000;
+            var request=NetworkProxy.Create("https://ollama.com/download/OllamaSetup.exe");request.Timeout=30000;request.ReadWriteTimeout=60000;
             ServicePointManager.SecurityProtocol|=SecurityProtocolType.Tls12;
             try {
                 using(token.Register(()=>request.Abort()))using(var response=(HttpWebResponse)request.GetResponse())using(var input=response.GetResponseStream())using(var output=File.Create(file)) {

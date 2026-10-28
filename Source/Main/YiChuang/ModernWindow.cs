@@ -32,7 +32,12 @@ namespace YiChuang {
   [DllImport("user32.dll")]private static extern bool ReleaseCapture();
   private int Px(int value){return (int)Math.Round(value*modernScale);}
   private Image UiIcon(string name){Image value;if(!modernImages.TryGetValue(name,out value)){value=ModernIcons.Draw(name.Replace("-white",""),name.EndsWith("-white")?Color.White:UiTheme.Accent,32);modernImages.Add(name,value);}return value;}
-  private ToolStrip NewStrip(string name){return new ToolStrip{Name=name,Dock=DockStyle.Fill,AutoSize=false,GripStyle=ToolStripGripStyle.Hidden,BackColor=UiTheme.Background,ForeColor=UiTheme.Ink,Font=Font,Renderer=new QuietToolStripRenderer(),ShowItemToolTips=true,CanOverflow=false,Margin=Padding.Empty};}
+  private ToolStrip NewStrip(string name){
+   var strip=name=="WindowActions"?(ToolStrip)new WindowActionStrip():new ToolStrip();
+   strip.Name=name;strip.Dock=DockStyle.Fill;strip.AutoSize=false;strip.GripStyle=ToolStripGripStyle.Hidden;
+   strip.BackColor=UiTheme.Background;strip.ForeColor=UiTheme.Ink;strip.Font=Font;strip.Renderer=new QuietToolStripRenderer();
+   strip.ShowItemToolTips=true;strip.CanOverflow=false;strip.Margin=Padding.Empty;return strip;
+  }
   private void DragTitle(object sender,MouseEventArgs e){if(e.Button==MouseButtons.Left){ReleaseCapture();SendMessage(Handle,0xA1,(IntPtr)2,IntPtr.Zero);}}
   private ToolStripButton HeaderButton(string name,string icon,string hint,Action action){var b=new ToolStripButton(hint,UiIcon(icon)){Name=name,ToolTipText=hint,AccessibleName=hint,DisplayStyle=ToolStripItemDisplayStyle.Image,Alignment=ToolStripItemAlignment.Right};b.Click+=(s,e)=>action();return b;}
   private void InitializeModernUi(){
@@ -85,7 +90,8 @@ namespace YiChuang {
    var dropdown=item as ToolStripDropDownButton;if(dropdown!=null){dropdown.ShowDropDownArrow=true;dropdown.Width+=Px(14);dropdown.ImageAlign=ContentAlignment.MiddleLeft;}
   }
   private void RefreshModernToolbar(){
-   if(!modernReady)return;bool compact=UiPreferences.Layout=="compact";
+   // CloseWindow disposes controls/images before later Click subscribers run.
+   if(!modernReady||IsDisposed||Disposing||modernImagesDisposed)return;bool compact=UiPreferences.Layout=="compact";
    foreach(var strip in new[]{toolStrip1,captureStrip,titleStrip,sourceStrip,targetStrip})strip.ImageScalingSize=new Size(Px(17),Px(17));
    toolStrip1.Padding=new Padding(Px(20),Px(12),Px(18),Px(12));captureStrip.Padding=new Padding(Px(20),Px(13),Px(20),Px(13));titleStrip.Padding=new Padding(0,Px(10),Px(8),Px(10));sourceStrip.Height=targetStrip.Height=Px(44);
    StyleAction(toolStripDropDownButton1,"engine",EngineLabels.MenuText(ClassMain.isjiekounum),"译文引擎："+EngineLabels.MenuText(ClassMain.isjiekounum),false);
@@ -112,7 +118,7 @@ namespace YiChuang {
    sourceLabel.DisplayStyle=targetLabel.DisplayStyle=compact?ToolStripItemDisplayStyle.Image:ToolStripItemDisplayStyle.ImageAndText;sourceLabel.Font=targetLabel.Font=Font;
    RefreshModernStatus();
   }
-  private void RefreshModernStatus(){if(!modernReady)return;localCancelButton.Visible=localCancelButton.Enabled;string error=ClassSetHotKey.LastError;modernStatus.Text=error;modernStatusStrip.Visible=!string.IsNullOrWhiteSpace(error);mainScaffold.RowStyles[4].Height=modernStatusStrip.Visible?Px(28):0;}
+  private void RefreshModernStatus(){if(!modernReady)return;localCancelButton.Visible=localCancelButton.Enabled;string error=ClassSetHotKey.LastError;modernStatus.Text=string.IsNullOrWhiteSpace(error)?timingText:error+(timingText.Length>0?" · "+timingText:"");modernStatus.ForeColor=string.IsNullOrWhiteSpace(error)?UiTheme.Muted:Color.Firebrick;modernStatus.ToolTipText="从发起翻译到结果显示的耗时，包含排队、网络等待及本地模型加载。";modernStatusStrip.ShowItemToolTips=true;modernStatusStrip.Visible=!string.IsNullOrWhiteSpace(modernStatus.Text);mainScaffold.RowStyles[4].Height=modernStatusStrip.Visible?Px(28):0;}
   private void SetCaptureMode(int mode,bool enabled){
    _翻译模式=mode<1||mode>3?1:mode;ClassMain._is自动翻译总开关=enabled;tbtntrans.Tag=enabled?"1":"0";ClassMain.Master_switch=enabled?"1":"0";
    timer1.Stop();clearHook();guanbi1();guanbi2();guanbi3();CancelExplicitCapture();shangyicifuzhi="";old_ClipboardData="";

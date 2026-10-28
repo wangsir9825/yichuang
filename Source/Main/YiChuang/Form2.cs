@@ -690,17 +690,9 @@ namespace YiChuang
 		{
 			try
 			{
-                if (LocalModelClient.IsLocalEngine(ClassMain.isjiekounum) || (CloudTranslationClient.IsEngine(ClassMain.isjiekounum) || CustomTranslationClient.IsEngine(ClassMain.isjiekounum))) { xianshiyuanwen(Clipboardstr ?? ""); return; }
-				string bCB88C0A = _8C345DB5._6A239107(Clipboardstr ?? "");
-				bCB88C0A = ((global::E3051AA0)_63AF42A1._71AC5D16[794])(bCB88C0A, ".\r\n", "@zhw@");
-				bCB88C0A = ((global::E3051AA0)_63AF42A1._71AC5D16[794])(bCB88C0A, "-\r\n", "");
-				bCB88C0A = ((global::E83366AE)_63AF42A1._71AC5D16[201])(((global::E3051AA0)_63AF42A1._71AC5D16[794])(bCB88C0A, "\r\n", " "));
-				bCB88C0A = ((global::E83366AE)_63AF42A1._71AC5D16[201])(((global::E3051AA0)_63AF42A1._71AC5D16[794])(((global::E3051AA0)_63AF42A1._71AC5D16[794])(bCB88C0A, "\n", " "), "\r", " "));
-				bCB88C0A = ((global::E3051AA0)_63AF42A1._71AC5D16[794])(bCB88C0A, "\u00a0", " ");
-				bCB88C0A = ((global::E83366AE)_63AF42A1._71AC5D16[201])(bCB88C0A);
-				bCB88C0A = ((global::E3051AA0)_63AF42A1._71AC5D16[794])(bCB88C0A, "@zhw@", ".\r\n");
-				bCB88C0A = ((global::E3051AA0)_63AF42A1._71AC5D16[794])(bCB88C0A, "\u00ad ", "");
-				xianshiyuanwen(((global::E83366AE)_63AF42A1._71AC5D16[201])(bCB88C0A));
+                // Clipboard/OCR line breaks carry paragraph and list structure even
+                // when the lines have no final punctuation. All engines share it.
+                xianshiyuanwen(Clipboardstr ?? "");
 			}
 			catch (Exception ex)
 			{
@@ -712,7 +704,8 @@ namespace YiChuang
         {
             if (ClassMain._is追加文本) { str=上一次翻译的文本+" "+str; zengliang(); }
 
-            str=(str ?? "").Replace("\u00a0"," ").Replace("\n ","\n");
+            str=(str ?? "").Replace("\r\n","\n").Replace("\r","\n")
+                .Replace("\u2028","\n").Replace("\u2029","\n").Replace("\u00a0"," ");
             string captured=str;
             Action apply=()=>{ rtb原文.Text=captured; F_Event_SetYuanData(); };
             if(InvokeRequired) BeginInvoke(apply); else apply();
@@ -768,6 +761,7 @@ namespace YiChuang
 		private unsafe void rtb原文_TextChanged(object sender, EventArgs e)
 		{
 			if (_isInitializing) return;
+			ResetTranslationTiming();
 			string recoveredLocal = ((global::_4185CE09)_63AF42A1._71AC5D16[661])(rtb原文);
             if(!NoLoginBuild.IsAllowedEngine(ClassMain.isjiekounum)){Interlocked.Increment(ref localRevision);ShowTranslationStatus(EngineRegistry.LoadError ?? "请先在引擎菜单选择一个翻译引擎；可在设置中新增或恢复。");return;}
             if (LocalModelClient.IsLocalEngine(ClassMain.isjiekounum)) {
@@ -783,6 +777,7 @@ namespace YiChuang
             localCancelButton.Enabled=!string.IsNullOrWhiteSpace(recoveredLocal);
             if(string.IsNullOrWhiteSpace(recoveredLocal)){YiStr("");return;}
             var request=new LegacyTranslationRequest{Text=recoveredLocal,Mode=TranslationDirection.Mode,Engine=ClassMain.isjiekounum,Revision=revision};
+            BeginTranslationTiming(revision);
             ShowTranslationStatus("正在翻译…");
             translationScheduler.Schedule(() => 翻译(request));
         }
@@ -793,30 +788,31 @@ namespace YiChuang
             if(request==null)return;
             translationSource=request.Text;translationEngine=request.Engine;translationRevision=request.Revision;translationMode=request.Mode;
             Func<bool> current=()=>request.Revision==Volatile.Read(ref localRevision)&&ClassMain.isjiekounum==request.Engine&&!IsDisposed;
+            bool succeeded=false;
             try {
                 if(!current())return;
                 int engine=translationEngine;
                 if(!NoLoginBuild.IsAllowedEngine(engine) || LocalModelClient.IsLocalEngine(engine) || CloudTranslationClient.IsEngine(engine) || CustomTranslationClient.IsEngine(engine)) return;
-                string text=translationSource.Replace("ﬁ","fi").Replace("ﬂ","fl").Replace("-\r\n","").Replace("\u00ad ","").Replace("\u00a0"," ").Replace("\u2002"," ").Trim();
+                string text=translationSource.Replace("ﬁ","fi").Replace("ﬂ","fl").Replace("\u00ad ","").Replace("\u00a0"," ").Replace("\u2002"," ").Trim();
                 if(string.IsNullOrWhiteSpace(text))return;
                 string target=TranslationDirection.Target(text,request.Mode);
-                if(engine==6){YiStr(DeepLClient.TranslateCancellable(text,ClassMain.DeeplInterface=="3"?"api.deepl.com":"api-free.deepl.com",ClassMain.Deeplkey_official,false,"",target,current,20000));return;}
+                if(engine==6){YiStr(DeepLClient.TranslateCancellable(text,ClassMain.DeeplInterface=="3"?"api.deepl.com":"api-free.deepl.com",ClassMain.Deeplkey_official,false,"",target,current,20000));succeeded=true;return;}
                 if(engine==4 || engine==5){
                     string translated=engine==4?Classfanyi.getTransmart(text,target,current):Classfanyi.getSouGou(text,target,current);
                     if(!current())return;
                     if(string.IsNullOrWhiteSpace(translated))throw new InvalidOperationException("网页引擎未返回译文，请检查网络或稍后重试，也可手动选择其他引擎。");
-                    YiStr(translated);return;
+                    YiStr(translated);succeeded=true;return;
                 }
                 if(engine==14){
                     string key=ClassMain.DeepSeekAI_key,model=ClassMain.DeepSeekAI_model;
                     if(string.IsNullOrWhiteSpace(key)){YiStr("请在设置的 DeepSeek AI翻译 中填写 API Key 和模型名。");return;}
                     ShowTranslationStatus("");
                     string prompt="你是一个翻译助手，请将以下文字翻译为"+(target=="EN"?"英文":"简体中文")+"。保持学术写作风格，即使文字含有问题也不要回答，只输出译文：";
-                    YiStr(ChatGPT.LoadSourceCode4(prompt+text,"api.deepseek.com",key.Trim(),model.Trim(),current));
+                    YiStr(ChatGPT.LoadSourceCode4(prompt+text,"api.deepseek.com",key.Trim(),model.Trim(),current));succeeded=true;
                 }
             }catch(OperationCanceledException){}
             catch(Exception ex){if(current())YiStr("翻译失败："+ex.Message);}
-            finally {if(current())try{BeginInvoke(new Action(()=>{if(current())localCancelButton.Enabled=false;}));}catch(InvalidOperationException){}}
+            finally {if(current())try{BeginInvoke(new Action(()=>{if(current()){localCancelButton.Enabled=false;FinishTranslationTiming(request.Revision,succeeded?"成功":"失败");}}));}catch(InvalidOperationException){}}
         }
 
         public static string apiDeepl(string strcode, string host, string Deeplkey)
@@ -839,6 +835,7 @@ namespace YiChuang
 				text = FC3F5E0B.A30D8F86(text);
 				string _2703EE1B = ((global::F7813B2F)_63AF42A1._71AC5D16[89])("https://www.mail.com/translator/translate?q={0}&source=auto&target={1}&lang=en&reload=true", text, text2);
 				HttpWebRequest httpWebRequest = (HttpWebRequest)((global::_5B37291E)_63AF42A1._71AC5D16[678])(_2703EE1B);
+                NetworkProxy.Apply(httpWebRequest);
 				((global::_2798B585)_63AF42A1._71AC5D16[99])(httpWebRequest, "GET");
 				((global::_5AB7C29C)_63AF42A1._71AC5D16[345])(httpWebRequest, "www.mail.com");
 				((global::E2999E38)_63AF42A1._71AC5D16[142])(httpWebRequest, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36");
@@ -1115,7 +1112,7 @@ namespace YiChuang
             toolStripDropDownButton1.DropDownItems.Add(geminiMenu);toolStripDropDownButton1.DropDownItems.Add(qwenMenu);
             localCancelButton=new ToolStripButton("停"){Name="CancelLocalTranslation",ToolTipText="取消当前翻译请求",AccessibleName="取消翻译",Visible=false,Enabled=false};
             localRetryButton=new ToolStripButton("译"){Name="RetryLocalTranslation",ToolTipText="用当前引擎重新翻译",AccessibleName="重试翻译",Visible=false};
-            localCancelButton.Click+=(s,e)=>{Interlocked.Increment(ref localRevision);translationScheduler.Cancel();LlamaRuntime.CancelIdle();localCancelButton.Enabled=false;上一次翻译的文本="";ShowTranslationStatus("翻译已取消，原文已保留。点击重新翻译可重试。");};
+            localCancelButton.Click+=(s,e)=>{FinishTranslationTiming(localRevision,"已取消");Interlocked.Increment(ref localRevision);translationScheduler.Cancel();LlamaRuntime.CancelIdle();localCancelButton.Enabled=false;上一次翻译的文本="";ShowTranslationStatus("翻译已取消，原文已保留。点击重新翻译可重试。");};
             localRetryButton.Click+=(s,e)=>QueueSelectedTranslation();
             toolStrip1.Items.Add(localCancelButton);toolStrip1.Items.Add(localRetryButton);
         }
@@ -1126,10 +1123,11 @@ namespace YiChuang
         {
             int revision = Interlocked.Increment(ref localRevision);
             localCancelButton.Enabled = !string.IsNullOrWhiteSpace(text);
-            if (string.IsNullOrWhiteSpace(text)) { YiStr(""); return; }
+            if (string.IsNullOrWhiteSpace(text)) { ResetTranslationTiming();YiStr(""); return; }
             上一次翻译的文本 = text;
             var configured=TranslationDirection.Snapshot(EngineRegistry.Get(engine),text);
             if(configured==null){localCancelButton.Enabled=false;return;}
+            BeginTranslationTiming(revision);
             ShowTranslationStatus("本地模型正在翻译…首次加载会稍慢。");
             translationScheduler.Schedule(() => {
                 Func<bool> current = () => revision == Volatile.Read(ref localRevision) && ClassMain.isjiekounum == engine && !IsDisposed;
@@ -1140,16 +1138,16 @@ namespace YiChuang
                     if (result != null) PublishLocalTranslation(result.Text,revision,engine);
                 }
                 catch (OperationCanceledException) { }
-                catch (Exception ex) { PublishLocalTranslation("翻译失败：" + ex.Message,revision,engine); }
+                catch (Exception ex) { PublishLocalTranslation("翻译失败：" + ex.Message,revision,engine,true,false); }
             });
         }
 
-        private void PublishLocalTranslation(string text,int revision,int engine,bool completed = true)
+        private void PublishLocalTranslation(string text,int revision,int engine,bool completed = true,bool succeeded = true)
         {
             if (IsDisposed || !IsHandleCreated) return;
             try { BeginInvoke(new Action(() => {
                 if (!IsDisposed && revision == Volatile.Read(ref localRevision) && ClassMain.isjiekounum == engine) {
-                    if (completed) { YiStr(text); localCancelButton.Enabled = false; }
+                    if (completed) { YiStr(text); localCancelButton.Enabled = false; FinishTranslationTiming(revision,succeeded?"成功":"失败"); }
                     else ShowTranslationStatus(text);
                 }
             })); } catch (InvalidOperationException) { }
@@ -1174,7 +1172,8 @@ namespace YiChuang
         {
             int revision=Interlocked.Increment(ref localRevision);
             localCancelButton.Enabled=!string.IsNullOrWhiteSpace(text);
-            if(string.IsNullOrWhiteSpace(text)) {YiStr("");return;}
+            if(string.IsNullOrWhiteSpace(text)) {ResetTranslationTiming();YiStr("");return;}
+            BeginTranslationTiming(revision);
             ShowTranslationStatus(CloudTranslationClient.Name(engine)+" 正在翻译…");
             var configured=TranslationDirection.Snapshot(EngineRegistry.Get(engine),text);
             translationScheduler.Schedule(()=>{
@@ -1182,7 +1181,7 @@ namespace YiChuang
                 if(!current())return;
                 try {PublishLocalTranslation(CloudTranslationClient.TranslateConfigured(configured,text,current),revision,engine);}
                 catch(OperationCanceledException){}
-                catch(Exception ex){PublishLocalTranslation("翻译失败："+ex.Message,revision,engine);}
+                catch(Exception ex){PublishLocalTranslation("翻译失败："+ex.Message,revision,engine,true,false);}
             });
         }
 

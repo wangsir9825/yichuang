@@ -1,4 +1,4 @@
-﻿#define AppVersion "1.5.5"
+﻿#define AppVersion "1.5.9"
 #define Root AddBackslash(SourcePath) + ".."
 
 [Setup]
@@ -38,6 +38,7 @@ Name: "desktopicon"; Description: "创建桌面快捷方式"; GroupDescription: 
 [Files]
 Source: "{#Root}\App\*"; DestDir: "{app}\App"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "{#Root}\其他电脑试用说明.txt"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#Root}\{#AppVersion}更新与试用说明.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#Root}\Build\Prerequisites\dotnet48.exe"; Flags: dontcopy
 Source: "{#Root}\Build\Prerequisites\vc_redist.x64.exe"; Flags: dontcopy
 
@@ -106,5 +107,5 @@ end;
 procedure InitializeWizard;
 begin
   WizardForm.WelcomeLabel2.Caption := '安装译窗及中英文离线 OCR。缺少微软运行环境时，安装器将自动打开内置的官方安装程序，可能需要管理员授权或重启。' + #13#10 + #13#10 +
-    '翻译大模型按需下载，不包含在安装包内。首次打开译窗可跳过本地模型配置，直接使用网页翻译。';
+    '翻译模型不包含在安装包内。打开译窗即可使用网页翻译；需要本地模型时，在设置中自行添加。';
 end;

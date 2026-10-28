@@ -83,7 +83,7 @@ class LanguageDirectionRegression
 
     static int[] Ids(string name){return (int[])Registry.GetProperty(name).GetValue(null,null);}
     static void Mode(Form main,string mode){var menu=(ToolStripDropDownButton)Field(main,"directionButton");foreach(ToolStripMenuItem item in menu.DropDownItems)if((string)item.Tag==mode){item.PerformClick();return;}throw new Exception("Missing direction item");}
-    static void Complete(Form main,Action action){int before=Requests;action();Wait(()=>Requests>before&&!((ToolStripButton)Field(main,"localCancelButton")).Enabled,12);Check(!((RichTextBox)Field(main,"rtb译文")).Text.StartsWith("翻译失败"),"Translation failed");}
+    static void Complete(Form main,Action action){int before=Requests;action();Wait(()=>Requests>before&&!((ToolStripButton)Field(main,"localCancelButton")).Enabled,12);Check(!((RichTextBox)Field(main,"rtb译文")).Text.StartsWith("翻译失败"),"Translation failed");Check(((ToolStripStatusLabel)Field(main,"modernStatus")).Text.StartsWith("翻译耗时："),"Completion timing missing for engine "+Config.GetField("isjiekounum").GetValue(null));}
     [STAThread]static int Main(string[] args)
     {
         Output=Path.GetFullPath(args[1]);Directory.CreateDirectory(Output);
@@ -99,18 +99,18 @@ class LanguageDirectionRegression
             using(var main=(Form)Activator.CreateInstance(App.GetType("YiChuang.Form2"))){
                 main.Opacity=0;main.Show();Application.DoEvents();Call(main,"SetCaptureMode",0,false);
                 if(args.Length>3){
-                    Check(Ids("VisibleIds").SequenceEqual(new[]{18,5}),"Checkbox/order did not survive restart");Check(App.GetType("YiChuang.TranslationDirection").GetField("Mode").GetValue(null).ToString()=="to-en","Direction did not survive restart");Check((int)Config.GetField("isjiekounum").GetValue(null)==18,"Selected engine changed after restart");Check(Ids("ActiveIds").Length==8&&Reg("Get",16)!=null,"Hidden model config removed");Check(Requests==0,"Restart sent network requests");main.Close();File.WriteAllText(Path.Combine(Output,"restart-pass.txt"),"Global direction + checkbox states + order + current engine survive new process; hidden configurations preserved; zero requests.");return 0;
+                    Check(Ids("VisibleIds").SequenceEqual(new[]{18,5}),"Checkbox/order did not survive restart");Check(App.GetType("YiChuang.TranslationDirection").GetField("Mode").GetValue(null).ToString()=="to-en","Direction did not survive restart");Check((int)Config.GetField("isjiekounum").GetValue(null)==18,"Selected engine changed after restart");Check(Ids("ActiveIds").Length==6&&Reg("Get",6)!=null,"Hidden model config removed");Check(Requests==0,"Restart sent network requests");main.Close();File.WriteAllText(Path.Combine(Output,"restart-pass.txt"),"Global direction + checkbox states + order + current engine survive new process; hidden configurations preserved; zero requests.");return 0;
                 }
                 var source=(RichTextBox)Field(main,"rtb原文");var target=(RichTextBox)Field(main,"rtb译文");
-                Check(Ids("VisibleIds").SequenceEqual(new[]{4,5,14,18}),"Wrong default four engines");Check(Ids("ActiveIds").Length==8,"Default hides lost configurations");
+                Check(Ids("VisibleIds").SequenceEqual(new[]{4,5,14,18}),"Wrong default four engines");Check(Ids("ActiveIds").Length==6,"Default hides lost configurations");
                 var dir=(ToolStripDropDownButton)Field(main,"directionButton");var engine=(ToolStripDropDownButton)Field(main,"toolStripDropDownButton1");
                 Check(dir.Owner==Field(main,"sourceStrip")&&engine.Owner==Field(main,"targetStrip"),"Selectors not over correct panes");Check(dir.DropDownItems.Count==3,"Direction should have exactly three modes");
                 using(var settings=(Form)Activator.CreateInstance(App.GetType("YiChuang.Frmsetting"))){
                     settings.Opacity=0;settings.Show(main);settings.GetType().GetMethod("ShowPage").Invoke(settings,new object[]{"引擎管理"});Application.DoEvents();
                     var list=(CheckedListBox)settings.Controls.Find("ManagedEngines",true)[0];Check(list.CheckedItems.Count==4,"Default checkbox mismatch");
-                    list.SetItemChecked(4,true);Check((bool)Reg("IsVisible",16),"Check did not show local model");list.SetItemChecked(4,false);Application.DoEvents();Check(Reg("Get",16)!=null&&!(bool)Reg("IsVisible",16),"Uncheck removed model config");
-                    list.SelectedIndex=6;((Button)settings.Controls.Find("MoveEngineUp",true)[0]).PerformClick();Check(Ids("ActiveIds")[5]==18,"Move button did not reorder stable ID");
-                    list.SelectedIndex=5;((Button)settings.Controls.Find("MoveEngineDown",true)[0]).PerformClick();Check(Ids("ActiveIds")[6]==18,"Move down failed");
+                    list.SetItemChecked(2,true);Check((bool)Reg("IsVisible",6),"Check did not show local model");list.SetItemChecked(2,false);Application.DoEvents();Check(Reg("Get",6)!=null&&!(bool)Reg("IsVisible",6),"Uncheck removed model config");
+                    list.SelectedIndex=4;((Button)settings.Controls.Find("MoveEngineUp",true)[0]).PerformClick();Check(Ids("ActiveIds")[3]==18,"Move button did not reorder stable ID");
+                    list.SelectedIndex=3;((Button)settings.Controls.Find("MoveEngineDown",true)[0]).PerformClick();Check(Ids("ActiveIds")[4]==18,"Move down failed");
                     Render(settings,"checked-engine-manager.png");((Button)settings.Controls.Find("SaveSettings",true)[0]).PerformClick();Check(settings.IsDisposed,"Save settings failed");
                 }
                 foreach(string layout in new[]{"wide","compact"}){
