@@ -1,6 +1,6 @@
-# 译窗 1.5.9 源码版使用说明
+# 译窗 1.5.9 试用版使用说明
 
-本文对应当前主分支；Releases 目前公开安装包为 1.5.5，旧包的界面与功能可能不同。新版本构建见 [BUILDING.md](BUILDING.md)。
+从 [1.5.9 Releases](https://github.com/wangsir9825/yichuang/releases/tag/v1.5.9) 下载 YiChuang-Setup-1.5.9.exe。本文对应 1.5.9 试用版；自行构建见 [BUILDING.md](BUILDING.md)。
 
 支持 Windows 10 22H2 / Windows 11 x64。安装器包含必要的 .NET Framework 4.8、Visual C++ x64 补装程序与独立中英文 OCR；缺少运行环境时可能请求管理员权限或重启。安装包未签署开发者证书。升级前退出译窗，安装到原目录；启动入口为桌面/开始菜单“译窗”，或安装目录 App/YiChuang.exe。便携版需完整解压再运行“启动译窗.vbs”。
 

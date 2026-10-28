@@ -1,7 +1,8 @@
-译窗 1.5.9 源码版
-本说明对应当前源码，公开下载安装包仍以 GitHub Releases 的实际版本为准。
-构建请阅读 BUILDING.md；使用方式请阅读 USAGE.md；验证限制请阅读 VALIDATION.md。
+译窗 1.5.9 试用版
+下载：https://github.com/wangsir9825/yichuang/releases/tag/v1.5.9
+普通用户下载 YiChuang-Setup-1.5.9.exe，退出译窗后安装到原目录；使用方式见 USAGE.md。
 首次启动直接进入翻译界面。本地模型按需自行添加，新配置默认仅 CPU。
 新用户默认微软雅黑 12 号，升级保留既有配置。网络代理在设置中全局选择。
 主窗口保留最小化、最大化和关闭；设置窗口仅关闭，可拖动边框缩放。
 安装包不含个人 API Key 和翻译模型权重。个人配置位于 %APPDATA%/YiChuang。
+安装包尚未签名。完整验证范围及限制见 VALIDATION.md。

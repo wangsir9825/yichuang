@@ -1,8 +1,10 @@
 # 译窗 YiChuang
 
-Windows 桌面翻译工具。主分支源码已更新到 **1.5.9**；目前公开安装包仍为 **1.5.5 试用版**，两者功能有所不同。
+Windows 桌面翻译工具。当前版本 **1.5.9 试用版**。
 
-**[前往 Releases 下载安装包和查看历史版本](https://github.com/wangsir9825/yichuang/releases)**。本次同步源码与文档，没有发布新的安装包；请以 Releases 的版本号为准。
+**[下载 1.5.9 安装包](https://github.com/wangsir9825/yichuang/releases/download/v1.5.9/YiChuang-Setup-1.5.9.exe)** · [版本说明与附件](https://github.com/wangsir9825/yichuang/releases/tag/v1.5.9) · [历史版本](https://github.com/wangsir9825/yichuang/releases)
+
+普通用户只需下载 `YiChuang-Setup-1.5.9.exe`，退出译窗后覆盖安装到原目录；个人配置和模型继续保留。
 
 支持中英翻译、鼠标划词、截图 OCR、舒展双栏与轻巧侧窗。翻译方向在原文区上方，引擎选择在译文区上方；引擎可以勾选显示、排序、添加或移除。在线引擎统一使用全局网络代理设置。
 
